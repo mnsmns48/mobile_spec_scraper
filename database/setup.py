@@ -1,4 +1,9 @@
+import asyncio
+
 from asyncpg import InvalidCatalogNameError
+
+from database.engine import db, create_db
+from database.models import Base
 
 
 async def setup_db():

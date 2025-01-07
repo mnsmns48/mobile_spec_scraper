@@ -1,3 +1,4 @@
+import json
 from dataclasses import dataclass
 
 from environs import Env
@@ -12,16 +13,23 @@ class DBSettings:
     database: str
 
 
-def load_var(path: str):
+@dataclass
+class PWSettings:
+    headless_mode: bool
+    enable_proxy: bool
+    proxy_timeout: int
+
+
+def load_var(path: str, _class: dataclass):
     env = Env()
     env.read_env()
+    attrs = _class.__annotations__
+    kwargs = dict()
+    for key, value in attrs.items():
+        method = getattr(env, value.__name__)
+        kwargs[key] = method(key.upper())
+    return _class(**kwargs)
 
-    return DBSettings(db_username=env.str("DB_USERNAME"),
-                      db_password=env.str("DB_PASSWORD"),
-                      db_host=env.str("DB_HOST"),
-                      db_port=env.int("DB_PORT"),
-                      database=env.str("DATABASE")
-                      )
 
-
-db_settings = load_var(path='.env')
+db_conf = load_var(path='.env', _class=DBSettings)
+pw_conf = load_var(path='.env', _class=PWSettings)
