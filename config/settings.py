@@ -1,7 +1,11 @@
 import json
+import os
 from dataclasses import dataclass
+from pathlib import Path
 
 from environs import Env
+
+root_path = Path(os.path.abspath(__file__)).parent.parent
 
 
 @dataclass
@@ -20,9 +24,9 @@ class PWSettings:
     proxy_timeout: int
 
 
-def load_var(path: str, _class: dataclass):
+def load_var(_class: dataclass):
     env = Env()
-    env.read_env()
+    env.read_env(path=f'{root_path}/setup/.env')
     attrs = _class.__annotations__
     kwargs = dict()
     for key, value in attrs.items():
@@ -31,5 +35,5 @@ def load_var(path: str, _class: dataclass):
     return _class(**kwargs)
 
 
-db_conf = load_var(path='.env', _class=DBSettings)
-pw_conf = load_var(path='.env', _class=PWSettings)
+db_conf = load_var(_class=DBSettings)
+pw_conf = load_var(_class=PWSettings)

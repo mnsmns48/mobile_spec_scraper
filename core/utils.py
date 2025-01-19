@@ -1,5 +1,6 @@
 import asyncio
 import pathlib, aiohttp
+import re
 
 from aiohttp import ClientOSError, ClientHttpProxyError
 
@@ -27,3 +28,9 @@ async def check_proxy_availability(proxy: dict) -> bool:
                         return True
         except (ClientOSError, UnboundLocalError, TimeoutError, ClientHttpProxyError):
             return False
+
+
+async def replace_spec_symbols(text: str) -> str:
+    text = text.replace('+', ' Plus')
+    return text
+
