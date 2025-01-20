@@ -30,7 +30,7 @@ async def add_new_one(session: AsyncSession, url: str,
             data.update(conditions)
         data.update({'create': datetime.now()})
         await write_data(session=session, table=Devices, data=data)
-        result = f'{data['brand']} {data['title']} added'
+        result = f"{data['brand']} {data['title']} added"
         logger.info(result)
         return result
     else:
