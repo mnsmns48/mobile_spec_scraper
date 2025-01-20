@@ -16,7 +16,7 @@ async def run_browser(playwright: Playwright) -> Browser:
             for proxy_elem in proxies_data:
                 result = await check_proxy_availability(proxy=proxy_elem)
                 if not result:
-                    logger.info(f'Non-working proxy {proxy_elem['server']} when selected enable_proxy=True')
+                    logger.info(f"Non-working proxy {proxy_elem['server']} when selected enable_proxy=True")
                     continue
                 else:
                     proxy.update(proxy_elem)
