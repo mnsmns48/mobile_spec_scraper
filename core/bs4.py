@@ -7,12 +7,12 @@ from config import logger
 from core.utils import replace_spec_symbols
 
 
-async def dict_result_prepare(title: str, info: list) -> dict:
+async def dict_result_prepare(title: str, info: list, pros_cons: list = None) -> dict:
     result = dict()
-    replaced_title = await replace_spec_symbols(text=title)
+    replaced_title = await replace_spec_symbols(text=title.lower())
     name_split = replaced_title.split(' ')
     result.update({
-        'title': ' '.join(name_split[1:]).strip(),
+        'title': ' '.join(name_split[1:]).strip() if len(name_split) >= 3 else replaced_title,
         'brand': name_split[0],
         'info': json.dumps(info, indent=4)
     })
@@ -80,6 +80,12 @@ async def nanoreview(soup: BeautifulSoup) -> dict | None:
     if info:
         title = soup.find(name='h1', attrs={'class': 'title-h1'}).getText()
         result = await dict_result_prepare(title=title, info=info)
+        result.update(
+            {
+                'advantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')],
+                'disadvantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')],
+            }
+        )
         return result
     else:
         logger.info('The device information block does not contain INFO-data. Check The link')

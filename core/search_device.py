@@ -1,3 +1,5 @@
+from typing import Any
+
 from sqlalchemy import func, select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -12,21 +14,13 @@ async def no_digits(text_str: str) -> bool:
     return True
 
 
-# async def tsv_process(words: list, tsv: str) -> bool:
-#     if await no_digits(text_str=tsv) and len(tsv) >= 3:
-#         tsv_ = tsv[:-1]
-#     else:
-#         tsv_ = tsv
-#     print(f"{tsv_}: {words}")
-#     for word in words:
-#         if tsv_ in word:
-#             return True
-#     return False
-
-async def tsv_process(words: list, tsv: str) -> bool:
+async def check_tsv(words: list, tsv: str) -> bool:
     for word in words:
-        if word == tsv or word[:-1] == tsv:
+        if word == tsv:
             return True
+        if await no_digits(text_str=word):
+            if word[:-1] == tsv:
+                return True
     return False
 
 
@@ -49,8 +43,7 @@ async def query_string_formating(text_string: str) -> list:
             while index != -1:
                 original_word = input_string[index:index + len(word)]
                 space_before = index > 0 and input_string[index - 1] != ' '
-                space_after = (index + len(word) < len(input_string) and
-                               input_string[index + len(word)] != ' ')
+                space_after = index + len(word) < len(input_string) and input_string[index + len(word)] != ' '
                 replacement = f"{' ' if space_before else ''}{original_word}{' ' if space_after else ''}"
                 input_string = input_string[:index] + replacement + input_string[index + len(word):]
                 working_string = input_string.lower()
@@ -58,37 +51,37 @@ async def query_string_formating(text_string: str) -> list:
     return working_string.split()
 
 
-async def search_devices(session: AsyncSession, query_string: str):  # -> list[Devices] | None
-    words = await query_string_formating(text_string=query_string)
-    tsquery_string = " | ".join(words)
+async def search_devices(session: AsyncSession,
+                         query_string: str,
+                         conditions: dict[str, Any] = None) -> Devices | None:
+    query_words = await query_string_formating(text_string=query_string)
+    tsquery_string = " | ".join(query_words)
     ts_query = func.to_tsquery('english', tsquery_string)
-    query = (select(Devices,
-                    func.ts_rank(Devices.title_tsv, ts_query).label('rank'),
-                    func.length(Devices.title_tsv).label('length'))
-             .filter(and_(func.length(Devices.title_tsv) >= 2),
-                     Devices.title_tsv.op('@@')(ts_query)).order_by(text('rank DESC')).limit(5))
+    query = select(Devices,
+                   func.ts_rank(Devices.title_tsv, ts_query).label('rank'),
+                   func.length(Devices.title_tsv).label('length'))
+    where_conditions = list()
+    if conditions:
+        for column, value in conditions.items():
+            column = getattr(Devices, column)
+            where_conditions.append(column == value)
+    query = query.filter(and_(
+        func.length(Devices.title_tsv) >= 2),
+        Devices.title_tsv.op('@@')(ts_query), *where_conditions)
+    query = query.order_by(text('rank DESC')).limit(5)
     execute_obj = await session.execute(query)
-    result_scalars = execute_obj.all()
-    result = list()
-    for line in result_scalars:
-        item_dict = dict()
-        tsv_list = [part.split(':')[0].strip("'") for part in line[0].title_tsv.split()]
-        tsv_list_true = tsv_list.copy()
-        for key in tsv_list:
-            tsv_process_obj = await tsv_process(words=words, tsv=key)
-            if tsv_process_obj:
-                item_dict.setdefault(line[0].title, []).append(True)
-                tsv_list_true.remove(key)
+    for line in execute_obj.all():
+        result = line[0]
+        device_obj = dict()
+        tsv_list = [tsj_obj.split(':')[0].strip("'") for tsj_obj in result.title_tsv.split()]
+        fail_tsv_attributes = tsv_list.copy()
+        for tsv in tsv_list:
+            tsv_value = await check_tsv(words=query_words, tsv=tsv)
+            if tsv_value:
+                device_obj.setdefault(result.title, []).append(True)
+                fail_tsv_attributes.remove(tsv)
             else:
-                item_dict.setdefault(line[0].title, []).append(False)
-        tsv_check = await check_binding_words(search_words=words, tsv_list=tsv_list)
-        if all(item_dict[line[0].title]) and (not tsv_list_true) and tsv_check:
-            result.append(line[0])
-            break
-    if result:
-        r = list()
-        for line in result:
-            r.append(line.title)
-        print(' '.join(r))
-        return ' '.join(r)
-    return None
+                device_obj.setdefault(result.title, []).append(False)
+        tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
+        if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
+            return result

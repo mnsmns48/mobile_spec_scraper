@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
 
-async def write_data(session: AsyncSession, table: type[DeclarativeBase], data: list | dict) -> None:
+async def write_data(session: AsyncSession,
+                     table: type[DeclarativeBase],
+                     data: list | dict) -> None:
     await session.execute(insert(table).values(data))
     await session.commit()
 

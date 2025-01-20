@@ -4,5 +4,6 @@ bind_words = [
     'max',
     'ultra',
     'neo',
-    'lite'
+    'lite',
+    'ne'
 ]

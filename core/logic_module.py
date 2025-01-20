@@ -1,4 +1,6 @@
 from datetime import datetime
+from typing import Any
+
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.asyncio import AsyncSession
 from config import logger
@@ -20,11 +22,18 @@ async def pars_link(url: str) -> dict:
             return result
 
 
-async def add_new_one(session: AsyncSession):
-    data = await pars_link(url='https://www.gsmarena.com/xiaomi_redmi_note_12-12063.php')
+async def add_new_one(session: AsyncSession, url: str,
+                      conditions: dict[str, Any] = None) -> str:
+    data = await pars_link(url=url)
     if data:
+        if conditions:
+            data.update(conditions)
         data.update({'create': datetime.now()})
         await write_data(session=session, table=Devices, data=data)
+        result = f'{data['brand']} {data['title']} added'
+        logger.info(result)
+        return result
     else:
-        logger.warning('Error. Data for writing into the database has not been created')
-
+        result = 'Error. Data for writing into the database has not been created'
+        logger.warning(result)
+        return result
