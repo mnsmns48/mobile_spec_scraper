@@ -34,3 +34,8 @@ async def add_info(link: Link):
     async with db.scoped_session() as session:
         result = await add_new_one(session=session, url=link.url, conditions=conditions)
     return result
+
+
+@info_router.get("/")
+async def welcome():
+    return 'it works'
