@@ -19,7 +19,7 @@ class Base(DeclarativeBase):
         return cls.__name__.lower()
 
 
-class DeviceDescription(Base):
+class DigitalTube(Base):
     __table_args__ = (UniqueConstraint('link', name='uix_link'),
                       Index('idx_link', 'link'),
                       Index('idx_title_tsv', 'title_tsv', postgresql_using='gin'))
@@ -37,12 +37,12 @@ class DeviceDescription(Base):
     update: Mapped[datetime_obj]
 
 
-@event.listens_for(DeviceDescription.__table__, 'after_create')
+@event.listens_for(DigitalTube.__table__, 'after_create')
 def create_update_title_tsv_trigger(target, connection, **kw):
     connection.execute(text(
-        """
+        f"""
         CREATE TRIGGER tsvectorupdate BEFORE INSERT OR UPDATE
-        ON devices FOR EACH ROW EXECUTE PROCEDURE
+        ON {DigitalTube.__table__} FOR EACH ROW EXECUTE PROCEDURE
         tsvector_update_trigger(title_tsv, 'pg_catalog.english', title);
         """
     ))

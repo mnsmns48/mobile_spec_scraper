@@ -3,7 +3,7 @@ from typing import Any
 from sqlalchemy import func, select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.models import DeviceDescription
+from database.models import DigitalTube
 from setup.binding_words import bind_words
 
 
@@ -53,21 +53,21 @@ async def query_string_formating(text_string: str) -> list:
 
 async def search_devices(session: AsyncSession,
                          query_string: str,
-                         conditions: dict[str, Any] = None) -> DeviceDescription | None:
+                         conditions: dict[str, Any] = None) -> DigitalTube | None:
     query_words = await query_string_formating(text_string=query_string)
     tsquery_string = " | ".join(query_words)
     ts_query = func.to_tsquery('english', tsquery_string)
-    query = select(DeviceDescription,
-                   func.ts_rank(DeviceDescription.title_tsv, ts_query).label('rank'),
-                   func.length(DeviceDescription.title_tsv).label('length'))
+    query = select(DigitalTube,
+                   func.ts_rank(DigitalTube.title_tsv, ts_query).label('rank'),
+                   func.length(DigitalTube.title_tsv).label('length'))
     where_conditions = list()
     if conditions:
         for column, value in conditions.items():
-            column = getattr(DeviceDescription, column)
+            column = getattr(DigitalTube, column)
             where_conditions.append(column == value)
     query = query.filter(and_(
-        func.length(DeviceDescription.title_tsv) >= 2),
-        DeviceDescription.title_tsv.op('@@')(ts_query), *where_conditions)
+        func.length(DigitalTube.title_tsv) >= 2),
+        DigitalTube.title_tsv.op('@@')(ts_query), *where_conditions)
     query = query.order_by(text('rank DESC')).limit(5)
     execute_obj = await session.execute(query)
     for line in execute_obj.all():
