@@ -1,14 +1,8 @@
-import asyncio
-
-import aiohttp
 from fastapi import APIRouter, Form
 from starlette.responses import HTMLResponse
-
 from api.schemas import Info, Link
-from config import pw_conf
 from core import add_new_one
 from core.search_device import search_devices
-
 from database.engine import db
 
 info_router = APIRouter()
@@ -80,14 +74,15 @@ async def add_link():
 async def submit_link(link: str = Form(...), title: str = Form('string'), brand: str = Form('string'),
                       product_type: str = Form('string'), source: str = Form('string')):
     url = Link(url=link, title=title, brand=brand, product_type=product_type, source=source)
+    print(url.title)
     result = await add_info(link=url)
     return HTMLResponse(content=f"""
     <h1>Result:</h1>
-    <p>Link: {link}</p>
-    <p>Title: {title}</p>
-    <p>Brand: {brand}</p>
-    <p>Product Type: {product_type}</p>
-    <p>Source: {source}</p>
-    <p>Result: {result}</p>
-    <a href="/add">Add</a>
     """)
+    # <p>Link: {link}</p>
+    # <p>Title: {title}</p>
+    # <p>Brand: {brand}</p>
+    # <p>Product Type: {product_type}</p>
+    # <p>Source: {source}</p>
+    # <p>Result: {result}</p>
+    # <a href="/add">Add</a>
