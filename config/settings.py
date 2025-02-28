@@ -24,6 +24,11 @@ class PWSettings:
     proxy_timeout: int
 
 
+@dataclass
+class AppSetup:
+    app_port: int
+
+
 def load_var(_class: dataclass):
     env = Env()
     env.read_env(path=f'{root_path}/setup/.env')
@@ -37,3 +42,4 @@ def load_var(_class: dataclass):
 
 db_conf = load_var(_class=DBSettings)
 pw_conf = load_var(_class=PWSettings)
+app_setup = load_var(_class=AppSetup)

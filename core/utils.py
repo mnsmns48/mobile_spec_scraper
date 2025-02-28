@@ -1,6 +1,5 @@
 import asyncio
 import pathlib, aiohttp
-import re
 
 from aiohttp import ClientOSError, ClientHttpProxyError
 

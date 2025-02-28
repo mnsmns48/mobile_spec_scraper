@@ -80,11 +80,11 @@ async def nanoreview(soup: BeautifulSoup) -> dict | None:
     if info:
         title = soup.find(name='h1', attrs={'class': 'title-h1'}).getText()
         result = await dict_result_prepare(title=title, info=info)
-        result.update(
-            {
-                'advantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')],
-                'disadvantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')],
-            }
+        result.update({'pros_cons':
+        {
+            'advantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')],
+            'disadvantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')],
+        }}
         )
         return result
     else:
