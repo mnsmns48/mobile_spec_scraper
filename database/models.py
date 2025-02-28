@@ -19,7 +19,7 @@ class Base(DeclarativeBase):
         return cls.__name__.lower()
 
 
-class Devices(Base):
+class DeviceDescription(Base):
     __table_args__ = (UniqueConstraint('link', name='uix_link'),
                       Index('idx_link', 'link'),
                       Index('idx_title_tsv', 'title_tsv', postgresql_using='gin'))
@@ -37,7 +37,7 @@ class Devices(Base):
     update: Mapped[datetime_obj]
 
 
-@event.listens_for(Devices.__table__, 'after_create')
+@event.listens_for(DeviceDescription.__table__, 'after_create')
 def create_update_title_tsv_trigger(target, connection, **kw):
     connection.execute(text(
         """

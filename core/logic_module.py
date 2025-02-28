@@ -8,7 +8,7 @@ from config.setup_product_type import detect_device_type
 from core.crud import write_data
 from core.pw_module import open_link
 from core.bs4 import get_bs4_func
-from database.models import Devices
+from database.models import DeviceDescription
 
 
 async def pars_link(url: str) -> dict:
@@ -29,7 +29,7 @@ async def add_new_one(session: AsyncSession, url: str,
         if conditions:
             data.update(conditions)
         data.update({'create': datetime.now()})
-        await write_data(session=session, table=Devices, data=data)
+        await write_data(session=session, table=DeviceDescription, data=data)
         result = f"{data['brand']} {data['title']} added"
         logger.info(result)
         return result
