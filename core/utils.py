@@ -1,5 +1,6 @@
 import asyncio
 import pathlib, aiohttp
+from datetime import timedelta
 
 from aiohttp import ClientOSError, ClientHttpProxyError
 
@@ -33,3 +34,6 @@ async def replace_spec_symbols(text: str) -> str:
     text = text.replace('+', ' Plus')
     return text
 
+
+async def dt_to_minute_round(dt):
+    return dt - timedelta(seconds=dt.second, microseconds=dt.microsecond)

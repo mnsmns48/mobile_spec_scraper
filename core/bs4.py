@@ -1,13 +1,13 @@
+import inspect
 import json
 import re
 import sys
 from typing import Callable
 from bs4 import BeautifulSoup
-from config import logger
 from core.utils import replace_spec_symbols
 
 
-async def dict_result_prepare(title: str, info: list, pros_cons: list = None) -> dict:
+async def dict_result_prepare(title: str, info: list) -> dict:
     result = dict()
     replaced_title = await replace_spec_symbols(text=title.lower())
     name_split = replaced_title.split(' ')
@@ -19,27 +19,29 @@ async def dict_result_prepare(title: str, info: list, pros_cons: list = None) ->
     return result
 
 
-async def extract_source_from_url(url: str) -> str | None:
+async def extract_source_from_url(url: str) -> dict:
     match = re.search(r'https?://(?:www\.)?([a-zA-Z0-9-]+)\.', url)
     if not match:
-        logger.info('URL parsing error')
-        return
+        error_msg = 'URL parsing error'
+        return {'response': error_msg, 'error': True}
     else:
         result = match.group(1)
-        return result
+        return {'url': result}
 
 
-async def get_bs4_func(url: str) -> Callable | None:
+async def get_bs4_func(url: str) -> dict | Callable:
     source = await extract_source_from_url(url=url)
-    func = getattr(sys.modules[__name__], source, None)
-    if func:
-        return func
-    else:
-        logger.info(f'Link to unknown resource. No function to process "{source}" site-source')
+    if not source.get('error'):
+        func = getattr(sys.modules[__name__], source['url'], None)
+        if func:
+            return func
+        else:
+            error_msg = f'Link to unknown resource. No function to process <<{source["url"]}>> site-source'
+            return {'response': error_msg, 'error': True}
+    return {'error': True, 'response': source.get('response')}
 
 
-async def gsmarena(soup: BeautifulSoup) -> dict | None:
-    result = dict()
+async def gsmarena(soup: BeautifulSoup, url: str) -> dict | None:
     info = list()
     main = soup.find_all(name='th', attrs={'scope': 'row'})
     categories = sorted(main, key=lambda x: int(x['rowspan']))
@@ -63,10 +65,13 @@ async def gsmarena(soup: BeautifulSoup) -> dict | None:
         result = await dict_result_prepare(title=title, info=info)
         return result
     else:
-        logger.info('The device information block does not contain INFO-data. Check The link')
+        return {'response': f'The device information block does not contain INFO-data. '
+                            f'Error parsing {inspect.currentframe().f_code.co_name.upper()}-function '
+                            f'or check this URL: {url}',
+                'error': True}
 
 
-async def nanoreview(soup: BeautifulSoup) -> dict | None:
+async def nanoreview(soup: BeautifulSoup, url: str) -> dict | None:
     info = list()
     categories = soup.select('div.card:has(> table.specs-table)')
     for category in categories:
@@ -81,11 +86,14 @@ async def nanoreview(soup: BeautifulSoup) -> dict | None:
         title = soup.find(name='h1', attrs={'class': 'title-h1'}).getText()
         result = await dict_result_prepare(title=title, info=info)
         result.update({'pros_cons':
-        {
-            'advantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')],
-            'disadvantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')],
-        }}
+            {
+                'advantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')],
+                'disadvantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')],
+            }}
         )
         return result
     else:
-        logger.info('The device information block does not contain INFO-data. Check The link')
+        return {'response': f'The device information block does not contain INFO-data. '
+                            f'Error parsing {inspect.currentframe().f_code.co_name.upper()}-function '
+                            f'or check this URL: {url}',
+                'error': True}

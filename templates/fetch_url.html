@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+{% block content %}
+{% if result %}
+<div class="result-container">
+    <p><strong>Status:</strong>
+        <span class="{% if result.response == 'inserted' %}status-inserted{% elif result.response == 'updated' %}status-updated{% endif %}">
+            {{ result.response.title() }}
+        </span></p>
+    <p><strong>Url:</strong> {{ result.link }}</p>
+    <p><strong>Brand:</strong> {{ result.brand.title() }}</p>
+    <p><strong>Title:</strong> {{ result.title.title() }}</p>
+    <p><strong>Product Type:</strong> {{ result.product_type.title() }}</p>
+    <p><strong>Source:</strong> {{ result.source.title() }}</p>
+    <a href="/add_url">Gve me more</a>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Coroutine, Callable
 
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,29 +11,39 @@ from core.bs4 import get_bs4_func
 from database.models import DigitalTube
 
 
-async def pars_link(url: str) -> dict:
+async def pars_link(url: str) -> None | dict:
     func = await get_bs4_func(url=url)
-    if func:
+    if isinstance(func, Callable):
         html = await open_link(url=url)
-        soup = BeautifulSoup(markup=html, features='lxml')
-        result = await func(soup=soup)
-        if isinstance(result, dict):
-            result.update({'link': url, 'source': func.__name__, 'product_type': await detect_device_type(url)})
-            return result
-
-
-async def add_new_one(session: AsyncSession, url: str,
-                      conditions: dict[str, Any] = None) -> str:
-    data = await pars_link(url=url)
-    if data:
-        if conditions:
-            data.update(conditions)
-        data.update({'create': datetime.now()})
-        await write_data(session=session, table=DigitalTube, data=data)
-        result = f"{data['brand']} {data['title']} added"
-        logger.info(result)
-        return result
+        if isinstance(html, str):
+            soup = BeautifulSoup(markup=html, features='lxml')
+            parsing_result = await func(soup=soup, url=url)
+            if not parsing_result.get('error'):
+                parsing_result.update(
+                    {'link': url, 'source': func.__name__, 'product_type': await detect_device_type(url)})
+                return parsing_result
+            return {'error': True, 'response': parsing_result['response']}
+        else:
+            return {'error': True, 'response': html['response']}
     else:
-        result = 'Error. Data for writing into the database has not been created'
-        logger.warning(result)
-        return result
+        return {'error': True, 'response': func['response']}
+
+
+async def add_new_one(session: AsyncSession,
+                      url: str,
+                      conditions: dict[str, Any] = None) -> dict:
+    parsing_result = await pars_link(url=url)
+    if not parsing_result.get('error'):
+        if conditions:
+            parsing_result.update(conditions)
+        parsing_result.update({'create': datetime.now()})
+        upload_status = await write_data(session=session, table=DigitalTube, data=parsing_result)
+        parsing_result.update({'response': upload_status})
+        logger.info(f"{upload_status}: {parsing_result['title']} from {parsing_result['link']}")
+        return parsing_result
+    else:
+        error_msg = parsing_result['response']
+        logger.warning(error_msg)
+        return {'error': True, 'response': error_msg}
+
+
