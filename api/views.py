@@ -5,7 +5,6 @@ from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
 
 from api.schemas import Info, Link, take_form_result
-from config.setup_product_type import DEVICE_TYPE_DEPENDENCY
 from core import add_new_one
 from core.search_device import search_devices
 from database.engine import db
