@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import Form
 from pydantic import BaseModel
@@ -18,6 +18,10 @@ class Link(BaseModel):
     brand: Optional[str | None]
     product_type: Optional[str | None]
     source: Optional[str | None]
+
+
+class ItemsList(BaseModel):
+    items: List[str]
 
 
 def take_form_result(url: str = Form(...),

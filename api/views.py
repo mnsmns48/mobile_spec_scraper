@@ -4,7 +4,7 @@ from fastapi import APIRouter, Form, Depends, Request
 from starlette.responses import HTMLResponse
 from starlette.templating import Jinja2Templates
 
-from api.schemas import Info, Link, take_form_result
+from api.schemas import Info, Link, take_form_result, ItemsList
 from core import add_new_one
 from core.search_device import search_devices
 from database.engine import db
@@ -25,7 +25,6 @@ async def get_one(data: Info):
         if v != 'string':
             conditions.update({k: v})
     conditions.pop('title')
-    print(conditions)
     async with db.scoped_session() as session:
         result = await search_devices(session=session,
                                       query_string=data.title,
@@ -36,10 +35,10 @@ async def get_one(data: Info):
 
 
 @info_router.post("/get_many/")
-async def get_many_items(items: list):
+async def get_many_items(items: ItemsList):
     result = dict()
     async with db.scoped_session() as session:
-        for item in items:
+        for item in items.items:
             found = await search_devices(session=session, query_string=item)
             if found:
                 result.update({item: found})
