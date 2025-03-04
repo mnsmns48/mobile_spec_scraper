@@ -6,11 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
 from core.utils import dt_to_minute_round
-from database.models import DigitalTube
+from database.models import ProductCharacteristics
 
 
 async def write_data(session: AsyncSession,
-                     table: type[DigitalTube],
+                     table: type[ProductCharacteristics],
                      data: list | dict):
     stmt = insert(table).values(data)
     new_data = {

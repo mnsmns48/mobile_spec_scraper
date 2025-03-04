@@ -1,5 +1,6 @@
 from asyncio import current_task
 from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator
 
 import asyncpg
 from pydantic_settings import BaseSettings
@@ -29,14 +30,14 @@ class DataBase:
                                                   expire_on_commit=False)
 
     @asynccontextmanager
-    async def scoped_session(self) -> AsyncSession:
+    async def scoped_session(self) -> AsyncGenerator[AsyncSession]:
         session = async_scoped_session(
             session_factory=self.session_factory,
             scopefunc=current_task,
         )
         try:
-            async with session() as s:
-                yield s
+            async with session() as sess:
+                yield sess
         finally:
             await session.remove()
 
@@ -51,7 +52,7 @@ async def create_db():
                                  host=db_conf.db_host,
                                  port=db_conf.db_port
                                  )
-    sql = f'CREATE DATABASE "{db_conf.database}"'
+    sql = f'CREATE DATABASE "{db_conf.database};"'
     await conn.execute(sql)
     await conn.close()
     logger.info(f"Database {db_conf.database} success created")
