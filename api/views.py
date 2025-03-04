@@ -36,10 +36,10 @@ async def get_one(data: Info):
 
 
 @info_router.post("/get_many/")
-async def get_many(many_items: list[str]):
+async def get_many_items(items: list):
     result = dict()
     async with db.scoped_session() as session:
-        for item in many_items:
+        for item in items:
             found = await search_devices(session=session, query_string=item)
             if found:
                 result.update({item: found})
