@@ -14,7 +14,7 @@ async def lifespan(app: FastAPI):
     await setup_db()
     yield
 
-app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(lifespan=lifespan) #, docs_url=None, redoc_url=None, openapi_url=None
 app.include_router(router=info_router, tags=["post_views"])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 

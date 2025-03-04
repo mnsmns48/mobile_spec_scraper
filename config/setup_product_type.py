@@ -3,7 +3,8 @@ DEVICE_TYPE_DEPENDENCY = {'pad': 'tablet',
                           'tablet': 'tablet',
                           'laptop': 'laptop',
                           'phone': 'phone',
-                          'watch': 'watch'
+                          'watch': 'watch',
+                          'смартфон': 'phone'
                           }
 
 
