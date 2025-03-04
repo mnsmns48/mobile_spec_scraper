@@ -85,12 +85,10 @@ async def nanoreview(soup: BeautifulSoup, url: str) -> dict | None:
     if info:
         title = soup.find(name='h1', attrs={'class': 'title-h1'}).getText()
         result = await dict_result_prepare(title=title, info=info)
-        result.update({'pros_cons':
-            {
-                'advantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')],
-                'disadvantage': [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')],
-            }}
-        )
+        advantage = [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')]
+        disadvantage = [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')]
+        if advantage or disadvantage:
+            result.update({'pros_cons': {'advantage': advantage, 'disadvantage': disadvantage}})
         return result
     else:
         return {'response': f'The device information block does not contain INFO-data. '
