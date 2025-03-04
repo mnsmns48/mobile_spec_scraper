@@ -52,7 +52,7 @@ async def create_db():
                                  host=db_conf.db_host,
                                  port=db_conf.db_port
                                  )
-    sql = f'CREATE DATABASE "{db_conf.database};"'
+    sql = f'CREATE DATABASE {db_conf.database}'
     await conn.execute(sql)
     await conn.close()
     logger.info(f"Database {db_conf.database} success created")
