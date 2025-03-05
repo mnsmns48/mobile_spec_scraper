@@ -37,18 +37,21 @@ async def check_binding_words(search_words: list, tsv_list: list) -> bool:
 async def query_string_formating(text_string: str) -> list:
     input_string = text_string.replace('+', ' plus')
     working_string = input_string.lower()
-    for word in bind_words:
-        if word in working_string:
-            index = working_string.find(word)
-            while index != -1:
-                original_word = input_string[index:index + len(word)]
-                space_before = index > 0 and input_string[index - 1] != ' '
-                space_after = index + len(word) < len(input_string) and input_string[index + len(word)] != ' '
-                replacement = f"{' ' if space_before else ''}{original_word}{' ' if space_after else ''}"
-                input_string = input_string[:index] + replacement + input_string[index + len(word):]
-                working_string = input_string.lower()
-                index = working_string.find(word, index + len(replacement))
-    return working_string.split()
+    result = []
+    i = 0
+    while i < len(working_string):
+        matched = False
+        for word in bind_words:
+            if working_string[i:i + len(word)] == word:
+                result.append(input_string[i:i + len(word)])
+                i += len(word)
+                matched = True
+                break
+        if not matched:
+            result.append(input_string[i])
+            i += 1
+    final_result = ''.join(result).split()
+    return final_result
 
 
 async def search_devices(session: AsyncSession,
