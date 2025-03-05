@@ -34,21 +34,40 @@ async def check_binding_words(search_words: list, tsv_list: list) -> bool:
     return True
 
 
+# async def query_string_formating(text_string: str) -> list:
+#     input_string = text_string.replace('+', ' plus')
+#     working_string = input_string.lower()
+#     for word in bind_words:
+#         if word in working_string:
+#             index = working_string.find(word)
+#             while index != -1:
+#                 original_word = input_string[index:index + len(word)]
+#                 space_before = index > 0 and input_string[index - 1] != ' '
+#                 space_after = index + len(word) < len(input_string) and input_string[index + len(word)] != ' '
+#                 replacement = f"{' ' if space_before else ''}{original_word}{' ' if space_after else ''}"
+#                 input_string = input_string[:index] + replacement + input_string[index + len(word):]
+#                 working_string = input_string.lower()
+#                 index = working_string.find(word, index + len(replacement))
+#     return working_string.split()
+
+
 async def query_string_formating(text_string: str) -> list:
     input_string = text_string.replace('+', ' plus')
     working_string = input_string.lower()
-    for word in bind_words:
-        if word in working_string:
-            index = working_string.find(word)
-            while index != -1:
-                original_word = input_string[index:index + len(word)]
-                space_before = index > 0 and input_string[index - 1] != ' '
-                space_after = index + len(word) < len(input_string) and input_string[index + len(word)] != ' '
-                replacement = f"{' ' if space_before else ''}{original_word}{' ' if space_after else ''}"
-                input_string = input_string[:index] + replacement + input_string[index + len(word):]
-                working_string = input_string.lower()
-                index = working_string.find(word, index + len(replacement))
-    return working_string.split()
+    result = []
+    i = 0
+    while i < len(working_string):
+        matched = False
+        for word in bind_words:
+            if working_string[i:i + len(word)] == word:
+                result.append(input_string[i:i + len(word)])
+                i += len(word)
+                matched = True
+                break
+        if not matched:
+            result.append(input_string[i].lower())
+            i += 1
+    return ''.join(result).split()
 
 
 async def search_devices(session: AsyncSession,
@@ -72,16 +91,16 @@ async def search_devices(session: AsyncSession,
     execute_obj = await session.execute(query)
     for line in execute_obj.all():
         result = line[0]
-        device_obj = dict()
-        tsv_list = [tsj_obj.split(':')[0].strip("'") for tsj_obj in result.title_tsv.split()]
-        fail_tsv_attributes = tsv_list.copy()
-        for tsv in tsv_list:
-            tsv_value = await check_tsv(words=query_words, tsv=tsv)
-            if tsv_value:
-                device_obj.setdefault(result.title, []).append(True)
-                fail_tsv_attributes.remove(tsv)
-            else:
-                device_obj.setdefault(result.title, []).append(False)
-        tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
-        if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
-            return result
+        # device_obj = dict()
+        # tsv_list = [tsj_obj.split(':')[0].strip("'") for tsj_obj in result.title_tsv.split()]
+        # fail_tsv_attributes = tsv_list.copy()
+        # for tsv in tsv_list:
+        #     tsv_value = await check_tsv(words=query_words, tsv=tsv)
+        #     if tsv_value:
+        #         device_obj.setdefault(result.title, []).append(True)
+        #         fail_tsv_attributes.remove(tsv)
+        #     else:
+        #         device_obj.setdefault(result.title, []).append(False)
+        # tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
+        # if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
+        return line[0]

@@ -26,11 +26,7 @@ async def get_one(data: Info):
             conditions.update({k: v})
     conditions.pop('title')
     async with db.scoped_session() as session:
-        result = await search_devices(session=session,
-                                      query_string=data.title,
-
-                                      conditions=conditions
-                                      )
+        result = await search_devices(session=session, query_string=data.title, conditions=conditions)
     return result
 
 
