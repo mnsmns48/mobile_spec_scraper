@@ -60,7 +60,7 @@ async def query_string_formating(text_string: str) -> list:
         matched = False
         for word in bind_words:
             if working_string[i:i + len(word)] == word:
-                result.append(input_string[i:i + len(word)])
+                result.append(input_string[i:i + len(word)].lower())
                 i += len(word)
                 matched = True
                 break
@@ -75,7 +75,7 @@ async def search_devices(session: AsyncSession,
                          conditions: dict[str, Any] = None) -> ProductCharacteristics | None:
     query_words = await query_string_formating(text_string=query_string)
     tsquery_string = " | ".join(query_words)
-    ts_query = func.to_tsquery('english', tsquery_string)
+    ts_query = func.to_tsquery('simple', tsquery_string)
     query = select(ProductCharacteristics,
                    func.ts_rank(ProductCharacteristics.title_tsv, ts_query).label('rank'),
                    func.length(ProductCharacteristics.title_tsv).label('length'))
@@ -91,16 +91,16 @@ async def search_devices(session: AsyncSession,
     execute_obj = await session.execute(query)
     for line in execute_obj.all():
         result = line[0]
-        # device_obj = dict()
-        # tsv_list = [tsj_obj.split(':')[0].strip("'") for tsj_obj in result.title_tsv.split()]
-        # fail_tsv_attributes = tsv_list.copy()
-        # for tsv in tsv_list:
-        #     tsv_value = await check_tsv(words=query_words, tsv=tsv)
-        #     if tsv_value:
-        #         device_obj.setdefault(result.title, []).append(True)
-        #         fail_tsv_attributes.remove(tsv)
-        #     else:
-        #         device_obj.setdefault(result.title, []).append(False)
-        # tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
-        # if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
-        return line[0]
+        device_obj = dict()
+        tsv_list = [tsj_obj.split(':')[0].strip("'") for tsj_obj in result.title_tsv.split()]
+        fail_tsv_attributes = tsv_list.copy()
+        for tsv in tsv_list:
+            tsv_value = await check_tsv(words=query_words, tsv=tsv)
+            if tsv_value:
+                device_obj.setdefault(result.title, []).append(True)
+                fail_tsv_attributes.remove(tsv)
+            else:
+                device_obj.setdefault(result.title, []).append(False)
+        tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
+        if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
+            return result
