@@ -20,7 +20,7 @@ class Link(BaseModel):
     source: Optional[str | None]
 
 
-class ItemsList(BaseModel):
+class ItemList(BaseModel):
     items: List[str]
 
 
