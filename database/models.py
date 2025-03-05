@@ -25,8 +25,7 @@ class ProductCharacteristics(Base):
                       Index('idx_title_tsv', 'title_tsv', postgresql_using='gin'))
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     title: Mapped[str]
-    title_tsv: Mapped[TSVECTOR] = mapped_column(TSVECTOR, Computed("to_tsvector('english', title)",
-                                                                   persisted=True))
+    title_tsv: Mapped[TSVECTOR] = mapped_column(TSVECTOR, Computed("to_tsvector('simple', title)", persisted=True))
     brand: Mapped[str]
     product_type: Mapped[str | None]
     link: Mapped[str]
