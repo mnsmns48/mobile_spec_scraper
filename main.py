@@ -2,6 +2,7 @@ from contextlib import asynccontextmanager
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 
 from api.views import info_router
@@ -14,10 +15,15 @@ async def lifespan(app: FastAPI):
     await setup_db()
     yield
 
-app = FastAPI(lifespan=lifespan) #, docs_url=None, redoc_url=None, openapi_url=None
+
+app = FastAPI(lifespan=lifespan)  # , docs_url=None, redoc_url=None, openapi_url=None
+app.add_middleware(CORSMiddleware,
+                   allow_origins=["*"],
+                   allow_methods=["*"],
+                   allow_headers=["*"],
+                   allow_credentials=True, )
 app.include_router(router=info_router, tags=["post_views"])
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-
 if __name__ == "__main__":
-    uvicorn.run("main:app", port=app_setup.app_port)
+    uvicorn.run("main:app", host="0.0.0.0", port=app_setup.app_port)
