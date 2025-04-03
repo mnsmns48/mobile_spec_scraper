@@ -2,7 +2,6 @@ from typing import Optional, List
 
 from fastapi import Form
 from pydantic import BaseModel
-from pydantic_core import Url
 
 
 class Info(BaseModel):
