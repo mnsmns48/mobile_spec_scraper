@@ -1,9 +1,9 @@
 from datetime import datetime
 from typing import Annotated, Optional
 
-from sqlalchemy import DateTime, func, UniqueConstraint, Index, text, Computed, String
+from sqlalchemy import DateTime, func, UniqueConstraint, Index, text, Computed, String, ForeignKey
 from sqlalchemy.dialects.postgresql import JSON, TSVECTOR, ARRAY
-from sqlalchemy.orm import DeclarativeBase, declared_attr, mapped_column, Mapped
+from sqlalchemy.orm import DeclarativeBase, declared_attr, mapped_column, Mapped, relationship
 from sqlalchemy import event
 
 pk = Annotated[str, mapped_column(primary_key=True)]
@@ -27,8 +27,8 @@ class Product(Base):
     title_line: Mapped[str]
     title: Mapped[str]
     title_tsv: Mapped[TSVECTOR] = mapped_column(TSVECTOR, Computed("to_tsvector('simple', title)", persisted=True))
-    brand_id: Mapped[int]
-    product_type_id: Mapped[int]
+    brand_id: Mapped[int] = mapped_column(ForeignKey('brand.id'))
+    product_type_id: Mapped[int] = mapped_column(ForeignKey('product_type.id'))
     link: Mapped[str]
     source: Mapped[str]
     info: Mapped[info_obj]
@@ -37,12 +37,13 @@ class Product(Base):
     update: Mapped[datetime_obj]
 
 
-class ProductType(Base):
+class Product_Type(Base):
     __table_args__ = (Index('idx_kind_tsv', 'kind_tsv', postgresql_using='gin'),)
     id: Mapped[int] = mapped_column(primary_key=True)
     type: Mapped[str] = mapped_column(nullable=False)
     kind: Mapped[list] = mapped_column(ARRAY(String), nullable=False)
     kind_tsv: Mapped[TSVECTOR] = mapped_column(TSVECTOR, nullable=True)
+    products: Mapped[list['Product']] = relationship('Product', back_populates='product_type')
 
 
 class Brand(Base):
@@ -51,6 +52,7 @@ class Brand(Base):
     brand: Mapped[str] = mapped_column(nullable=False)
     brand_depends: Mapped[list] = mapped_column(ARRAY(String), nullable=False)
     brand_depends_tsv: Mapped[TSVECTOR] = mapped_column(TSVECTOR, nullable=True)
+    products: Mapped[list['Product']] = relationship('Product', back_populates='brand')
 
 
 @event.listens_for(Product.__table__, 'after_create')
@@ -82,7 +84,8 @@ def create_update_kind_tsv_trigger(target, connection, **kw):
         """
     ))
 
-@event.listens_for(ProductType.__table__, 'after_create')
+
+@event.listens_for(Product_Type.__table__, 'after_create')
 def create_update_kind_tsv_trigger(target, connection, **kw):
     connection.execute(text(
         f"""

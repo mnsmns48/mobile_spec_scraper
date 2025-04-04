@@ -15,7 +15,7 @@ async def get_proxy_file() -> str | None:
         for file in files:
             return file
     logger.info(f"Proxy mode is activated, but proxy file is not found")
-    return
+
 
 
 async def check_proxy_availability(proxy: dict) -> bool:
