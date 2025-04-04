@@ -1,4 +1,3 @@
-import asyncio
 import logging
 
 from playwright.async_api import async_playwright
@@ -18,4 +17,3 @@ async def open_link(url: str) -> str | dict:
         error_msg = f'Error HTML-code in {url}'
         logging.info(error_msg)
         return {'response': error_msg, 'error': 1}
-

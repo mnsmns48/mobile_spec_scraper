@@ -4,19 +4,17 @@ import re
 import sys
 from typing import Callable
 from bs4 import BeautifulSoup
-from core.utils import replace_spec_symbols
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
-async def dict_result_prepare(title: str, info: list) -> dict:
-    result = dict()
-    replaced_title = await replace_spec_symbols(text=title.lower())
-    name_split = replaced_title.split(' ')
-    result.update({
-        'title': ' '.join(name_split[1:]).strip() if len(name_split) >= 3 else replaced_title,
-        'brand': name_split[0],
-        'info': json.dumps(info, indent=4)
-    })
-    return result
+async def title_result_prepare(bs_result: dict) -> dict:
+    sanitized_title = bs_result['title'].lower().replace('+', ' Plus')
+    name_split = sanitized_title.split(' ')
+    bs_result.update(
+        {'title_line': bs_result['title'],
+         'title': ' '.join(name_split[1:]).strip() if len(name_split) >= 3 else sanitized_title}
+    )
+    return bs_result
 
 
 async def extract_source_from_url(url: str) -> dict:
@@ -41,7 +39,18 @@ async def get_bs4_func(url: str) -> dict | Callable:
     return {'error': True, 'response': source.get('response')}
 
 
-async def gsmarena(soup: BeautifulSoup, url: str) -> dict | None:
+def generate_bs4_info_parsing(url: str) -> dict:
+    return {
+        'response': (
+            f'The device information block does not contain INFO-data. '
+            f'Error parsing {inspect.currentframe().f_code.co_name.upper()}-function '
+            f'or check this URL: {url}'
+        ),
+        'error': True
+    }
+
+
+async def gsmarena(soup: BeautifulSoup, url: str) -> dict:
     info = list()
     main = soup.find_all(name='th', attrs={'scope': 'row'})
     categories = sorted(main, key=lambda x: int(x['rowspan']))
@@ -62,16 +71,12 @@ async def gsmarena(soup: BeautifulSoup, url: str) -> dict | None:
         info.append({category.getText(): category_dict})
     if info:
         title = soup.find(name='h1', attrs={'class': 'specs-phone-name-title'}).getText()
-        result = await dict_result_prepare(title=title, info=info)
-        return result
+        return {'title': title, 'info': json.dumps(info, indent=4)}
     else:
-        return {'response': f'The device information block does not contain INFO-data. '
-                            f'Error parsing {inspect.currentframe().f_code.co_name.upper()}-function '
-                            f'or check this URL: {url}',
-                'error': True}
+        return generate_bs4_info_parsing(url=url)
 
 
-async def nanoreview(soup: BeautifulSoup, url: str) -> dict | None:
+async def nanoreview(soup: BeautifulSoup, url: str) -> dict:
     info = list()
     categories = soup.select('div.card:has(> table.specs-table)')
     for category in categories:
@@ -84,14 +89,11 @@ async def nanoreview(soup: BeautifulSoup, url: str) -> dict | None:
         info.append({title_category.getText(): category_dict})
     if info:
         title = soup.find(name='h1', attrs={'class': 'title-h1'}).getText()
-        result = await dict_result_prepare(title=title, info=info)
+        result = {'title': title, 'info': json.dumps(info, indent=4)}
         advantage = [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')]
         disadvantage = [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')]
         if advantage or disadvantage:
             result.update({'pros_cons': {'advantage': advantage, 'disadvantage': disadvantage}})
         return result
     else:
-        return {'response': f'The device information block does not contain INFO-data. '
-                            f'Error parsing {inspect.currentframe().f_code.co_name.upper()}-function '
-                            f'or check this URL: {url}',
-                'error': True}
+        return generate_bs4_info_parsing(url=url)

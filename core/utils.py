@@ -1,5 +1,6 @@
 import asyncio
 import pathlib, aiohttp
+import re
 from datetime import timedelta
 
 from aiohttp import ClientOSError, ClientHttpProxyError
@@ -30,10 +31,13 @@ async def check_proxy_availability(proxy: dict) -> bool:
             return False
 
 
-async def replace_spec_symbols(text: str) -> str:
-    text = text.replace('+', ' Plus')
-    return text
-
 
 async def dt_to_minute_round(dt):
     return dt - timedelta(seconds=dt.second, microseconds=dt.microsecond)
+
+async def url_to_short_string(url: str, resource_name: str) -> str:
+    delimiters = ["/", "-", "_", "."]
+    resource = re.split(f"{resource_name}.*?/", url, maxsplit=1)[-1]
+    pattern = "[" + re.escape("".join(delimiters)) + "]"
+    words = re.split(pattern, resource)
+    return " ".join(filter(None, words))

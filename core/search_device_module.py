@@ -1,9 +1,10 @@
 from typing import Any
 
-from sqlalchemy import func, select, and_, text
+from sqlalchemy import func, select, and_, text, Column
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import InstrumentedAttribute
 
-from database.models import Product
+from database.models import Product, Base
 from setup.binding_words import bind_words
 
 
@@ -32,23 +33,6 @@ async def check_binding_words(search_words: list, tsv_list: list) -> bool:
             else:
                 return False
     return True
-
-
-# async def query_string_formating(text_string: str) -> list:
-#     input_string = text_string.replace('+', ' plus')
-#     working_string = input_string.lower()
-#     for word in bind_words:
-#         if word in working_string:
-#             index = working_string.find(word)
-#             while index != -1:
-#                 original_word = input_string[index:index + len(word)]
-#                 space_before = index > 0 and input_string[index - 1] != ' '
-#                 space_after = index + len(word) < len(input_string) and input_string[index + len(word)] != ' '
-#                 replacement = f"{' ' if space_before else ''}{original_word}{' ' if space_after else ''}"
-#                 input_string = input_string[:index] + replacement + input_string[index + len(word):]
-#                 working_string = input_string.lower()
-#                 index = working_string.find(word, index + len(replacement))
-#     return working_string.split()
 
 
 async def query_string_formating(text_string: str) -> list:
@@ -104,3 +88,18 @@ async def search_devices(session: AsyncSession,
         tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
         if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
             return result
+
+
+async def search_product_by_model(session: AsyncSession,
+                                  query_string: str,
+                                  model: type(Base), tsv_column: InstrumentedAttribute) -> type(Base) | None:
+    tsquery_string = " | ".join(query_string.split())
+    ts_query = func.to_tsquery('simple', tsquery_string)
+    query = select(model,
+                   func.ts_rank(tsv_column, ts_query).label('rank'),
+                   func.length(tsv_column).label('length'))
+    query = query.filter(tsv_column.op('@@')(ts_query))
+    query = query.order_by(text('rank DESC')).limit(1)
+    execute_obj = await session.execute(query)
+    for line in execute_obj.all():
+        return line[0]

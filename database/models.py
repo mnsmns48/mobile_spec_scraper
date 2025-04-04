@@ -29,14 +29,16 @@ class Product(Base):
     title_line: Mapped[str]
     title: Mapped[str]
     title_tsv: Mapped[TSVECTOR] = mapped_column(TSVECTOR, Computed("to_tsvector('simple', title)", persisted=True))
-    brand_id: Mapped[int] = mapped_column(ForeignKey('brand.id'))
-    product_type_id: Mapped[int] = mapped_column(ForeignKey('product_type.id'))
+    brand_id: Mapped[int] = mapped_column(ForeignKey('brand.id'), nullable=True)
+    product_type_id: Mapped[int] = mapped_column(ForeignKey('product_type.id'), nullable=True)
     link: Mapped[str]
     source: Mapped[str]
     info: Mapped[info_obj]
     pros_cons: Mapped[Optional[info_obj]]
     create: Mapped[datetime] = mapped_column(DateTime(timezone=False))
     update: Mapped[datetime_obj]
+    product_type: Mapped['Product_Type'] = relationship('Product_Type', back_populates='products')
+    brand: Mapped['Brand'] = relationship('Brand', back_populates='products')
 
 
 class Product_Type(Base):

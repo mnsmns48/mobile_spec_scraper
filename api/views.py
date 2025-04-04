@@ -6,7 +6,7 @@ from starlette.templating import Jinja2Templates
 
 from api.schemas import Info, Link, take_form_result, ItemList
 from core import add_new_one
-from core.search_device import search_devices
+from core.search_device_module import search_devices
 from database.engine import db
 
 info_router = APIRouter()

@@ -1,14 +1,16 @@
 from datetime import datetime
-from typing import Any, Coroutine, Callable
+from typing import Any, Callable
 
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.asyncio import AsyncSession
 from config import logger
-from config.setup_product_type import detect_device_type
 from core.crud import write_data
 from core.pw_module import open_link
-from core.bs4 import get_bs4_func
-from database.models import Product
+from core.bs4 import get_bs4_func, title_result_prepare
+from core.search_device_module import search_product_by_model
+from core.utils import url_to_short_string
+from database.engine import db
+from database.models import Product, Product_Type, Brand
 
 
 async def pars_link(url: str) -> None | dict:
@@ -18,9 +20,23 @@ async def pars_link(url: str) -> None | dict:
         if isinstance(html, str):
             soup = BeautifulSoup(markup=html, features='lxml')
             parsing_result = await func(soup=soup, url=url)
+            async with db.scoped_session() as session:
+                parsed_url_string = await url_to_short_string(url=url, resource_name=func.__name__)
+                product_type: Product_Type = await search_product_by_model(session=session,
+                                                                           query_string=parsed_url_string,
+                                                                           model=Product_Type,
+                                                                           tsv_column=Product_Type.kind_tsv)
+                brand: Brand = await search_product_by_model(session=session,
+                                                             query_string=parsed_url_string,
+                                                             model=Brand,
+                                                             tsv_column=Brand.brand_depends_tsv)
+                parsing_result = await title_result_prepare(bs_result=parsing_result)
             if not parsing_result.get('error'):
                 parsing_result.update(
-                    {'link': url, 'source': func.__name__, 'product_type': await detect_device_type(url)})
+                    {'link': url,
+                     'source': func.__name__,
+                     'product_type_id': product_type.id if product_type else None,
+                     'brand_id': brand.id if brand else None})
                 return parsing_result
             return {'error': True, 'response': parsing_result['response']}
         else:
@@ -45,5 +61,3 @@ async def add_new_one(session: AsyncSession,
         error_msg = parsing_result['response']
         logger.warning(error_msg)
         return {'error': True, 'response': error_msg}
-
-
