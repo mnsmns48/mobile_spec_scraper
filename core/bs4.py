@@ -4,7 +4,6 @@ import re
 import sys
 from typing import Callable
 from bs4 import BeautifulSoup
-from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def title_result_prepare(bs_result: dict) -> dict:

@@ -1,14 +1,17 @@
 {% extends 'index.html' %}
 {% block content %}
 <div class="form-container">
-    <form action="/submit" method="post">
-        <label for="url">Url:</label>
+    <form action="/submit_one_url" method="post">
+        <label for="url">Url</label>
         <input type="text" id="url" name="url"><br>
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title"><br>
-             <label for="source">Source:</label>
-        <input type="text" id="source" name="source"><br>
         <input type="submit" value="Insert or Update">
     </form>
+    <div class="form-container_engineering">
+        <button type="button"
+                class="engineering-menu-button"
+                onclick="window.location.href='/engineering-menu'">Engineering Menu</button>
+    </div>
 </div>
+
+
 {% endblock %}

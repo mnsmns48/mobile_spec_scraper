@@ -3,8 +3,12 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
 
+from api.errors import ValidationFailedException
+from api.handlers import register_handlers
+from api.routers import templates
 from api.views import info_router
 from config.settings import app_setup
 from database import setup_db
@@ -24,6 +28,7 @@ app.add_middleware(CORSMiddleware,
                    allow_credentials=True, )
 app.include_router(router=info_router, tags=["post_views"])
 app.mount("/static", StaticFiles(directory="static"), name="static")
+register_handlers(app)
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", port=app_setup.app_port)

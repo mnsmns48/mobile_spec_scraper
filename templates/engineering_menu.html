@@ -1,0 +1,17 @@
+{% extends 'index.html' %}
+{% block content %}
+<div class="form-container" style="margin-bottom: 20px">
+    <form action="/submit_pars_all" method="post">
+        <label for="url">URL with list</label>
+        <input type="text" id="url" name="url"><br>
+        <input type="submit" value="Pars All" class="button">
+    </form>
+    <div class="back-button-container">
+        <button type="button"
+                class="button-back"
+                onclick="window.location.href='/add_url'">Back
+        </button>
+    </div>
+</div>
+
+{% endblock %}

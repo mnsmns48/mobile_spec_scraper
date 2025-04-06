@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Any, Sequence
-from sqlalchemy import select, and_
+from typing import Any, Sequence, Coroutine
+from sqlalchemy import select, and_, Row
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
 from core.utils import dt_to_minute_round
-from database.models import Product
+from database.models import Product, Brand
 
 
 async def write_data(session: AsyncSession,
@@ -44,3 +44,12 @@ async def get_data(session: AsyncSession,
         stmt = stmt.where(and_(*where_conditions))
     result = await session.execute(stmt)
     return result.scalars().all()
+
+
+async def add_new_brand(session: AsyncSession, title: str) -> Brand:
+    brand = title.split(' ')[0].lower()
+    stmt = insert(Brand).values({'brand': brand, 'brand_depends': [brand]}).returning(Brand)
+    result = await session.execute(stmt)
+    await session.commit()
+    returning_brand = result.fetchone()
+    return returning_brand[0]

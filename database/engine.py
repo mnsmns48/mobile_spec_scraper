@@ -2,6 +2,7 @@ from asyncio import current_task
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 
+
 import asyncpg
 from pydantic_settings import BaseSettings
 from sqlalchemy import NullPool

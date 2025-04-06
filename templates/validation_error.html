@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Validation Error</title>
+    <link href="{{ url_for('static', path='/error.css') }}" rel="stylesheet"/>
+</head>
+<body>
+    <div class="error-container">
+        <div class="error-icon">❗</div>
+        <div class="error-message">Validation failed: URL не соответствует ожидаемому формату.</div>
+        <button class="back-button" onclick="history.back()">Назад</button>
+    </div>
+</body>
+</html>

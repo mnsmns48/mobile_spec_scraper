@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="links-container">
+    <ul id="links-list" class="links-list">
+        {% for url in url_for_pars %}
+            <li>
+                <button class="add-button" onclick="removeLink(this)">+</button>
+                <a href="{{ url['a'] }}" target="_blank">{{ url['title'] }}</a>
+            </li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='link_downloader.js') }}"></script>
+{% endblock %}

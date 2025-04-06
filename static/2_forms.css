@@ -1,24 +1,10 @@
-body {
-    font-family: Arial, sans-serif;
-    background-color: #f4f4f9;
-    margin: 0;
-    padding: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
 .form-container {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     width: 300px;
-}
-
-.form-container h1 {
-    font-size: 24px;
+    text-align: center;
     margin-bottom: 20px;
 }
 
@@ -37,32 +23,14 @@ body {
 }
 
 .form-container input[type="submit"] {
-    display: block;
-    margin: 0 auto;
-    width: 100%;
+    font-size: 14px;
     background-color: #426df1;
     color: #fff;
     border: none;
-    padding: 10px;
-    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
 }
 
 .form-container input[type="submit"]:hover {
-    background-color: #426df1;
-}
-
-.status-inserted {
-    color: green;
-    font-weight: bold;
-}
-
-.status-updated {
-    color: blue;
-    font-weight: bold;
-}
-
-a.start-link {
-    text-decoration: none;
-    color: black;
+    background-color: #2948a1;
 }
