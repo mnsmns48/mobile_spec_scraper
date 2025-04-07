@@ -5,7 +5,7 @@
     <ul id="links-list" class="links-list">
         {% for url in url_for_pars %}
             <li>
-                <button class="add-button" onclick="removeLink(this)">+</button>
+                <button class="add-button" onclick="parsingObj(this)">+</button>
                 <a href="{{ url['a'] }}" target="_blank">{{ url['title'] }}</a>
             </li>
         {% endfor %}

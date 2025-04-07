@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 
 
 async def title_result_prepare(bs_result: dict) -> dict:
-    sanitized_title = bs_result['title'].lower().replace('+', ' Plus')
+    sanitized_title = bs_result['title'].replace('+', ' Plus').lower()
     name_split = sanitized_title.split(' ')
     bs_result.update(
         {'title_line': bs_result['title'],

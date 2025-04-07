@@ -1,20 +1,35 @@
-console.log("Скрипт работает для страницы link_for_pars.html");
-document.querySelectorAll('#links-list a').forEach(link => {
-    link.addEventListener('mouseover', () => {
-        link.style.color = 'red';
-    });
-    link.addEventListener('mouseout', () => {
-        link.style.color = '';
-    });
-});
-
-function removeLink(button) {
-    // Проверяем, является ли button DOM-элементом
+function parsingObj(button) {
     if (button instanceof HTMLElement) {
-        const listItem = button.closest('li'); // Находим ближайший родительский элемент <li>
+        const listItem = button.closest('li');
         if (listItem) {
-            listItem.remove(); // Удаляем элемент списка
-            console.log("Элемент списка удален:", listItem);
+            const link = listItem.querySelector('a');
+            if (link) {
+                const urlData = {
+                    url: link.getAttribute('href')
+                };
+                fetch('/add_info/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(urlData)
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Ошибка при отправке данных на сервер');
+                    }
+                    return response.text();
+                })
+                .then(data => {
+                    console.log(urlData.url, ': ok');
+                    listItem.remove();
+                })
+                .catch(error => {
+                    console.error('Ошибка:', error);
+                });
+            } else {
+                console.error("Не удалось найти ссылку <a> внутри <li>");
+            }
         } else {
             console.error("Не удалось найти родительский <li> для кнопки");
         }

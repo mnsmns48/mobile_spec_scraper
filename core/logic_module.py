@@ -4,7 +4,7 @@ from typing import Any, Callable
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.asyncio import AsyncSession
 from config import logger
-from core.crud import write_data, add_new_brand
+from core.crud import write_data, add_new_brand, get_missing_products
 from core.pw_module import open_link
 from core.bs4 import get_bs4_func, title_result_prepare
 from core.search_device_module import search_product_by_model
@@ -65,15 +65,16 @@ async def add_new_one(session: AsyncSession,
         return {'error': True, 'response': error_msg}
 
 
-
-async def get_url_list_for_parsing(url: str):
+async def get_nanoreview_list_for_parsing(url: str):
     html = await open_link(url=url)
     if isinstance(html, str):
         soup = BeautifulSoup(markup=html, features='lxml')
         links = soup.find_all(name='a', attrs={'style': 'font-weight:500;'})
-        result = list()
+        products = list()
         for line in links:
-            result.append({'a': line.get('href'), 'title': line.getText()})
-        return result
+            products.append({'a': 'https://nanoreview.net' + line.get('href'), 'title': line.getText()})
+        async with db.scoped_session() as session:
+            products = await get_missing_products(session=session, products=products)
+        return products
     else:
         return {'error': True, 'response': html['response']}

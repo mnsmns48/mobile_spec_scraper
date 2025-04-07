@@ -8,7 +8,7 @@ from api.routers import templates, info_router
 from api.schemas import Info, Link, take_form_result, ItemList
 from core import add_new_one
 from api.errors import ValidationFailedException
-from core.logic_module import get_url_list_for_parsing
+from core.logic_module import get_nanoreview_list_for_parsing
 from core.search_device_module import search_devices
 from database.engine import db
 
@@ -86,7 +86,7 @@ async def submit_pars_all(request: Request):
     url_for_pars = form_data.get("url")
     pattern = r'^https://nanoreview\.net/(ru|en)/.+/all-.+$'
     if bool(re.match(pattern, url_for_pars)):
-        url_list = await get_url_list_for_parsing(url=url_for_pars)
+        url_list = await get_nanoreview_list_for_parsing(url=url_for_pars)
         return templates.TemplateResponse("link_for_pars.html", {"request": request, "url_for_pars": url_list})
     else:
         raise ValidationFailedException(message="URL does not match the expected format")

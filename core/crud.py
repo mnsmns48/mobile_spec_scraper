@@ -53,3 +53,12 @@ async def add_new_brand(session: AsyncSession, title: str) -> Brand:
     await session.commit()
     returning_brand = result.fetchone()
     return returning_brand[0]
+
+
+async def get_missing_products(session: AsyncSession, products: list[dict]):
+    titles = [product['title'] for product in products]
+    query = select(Product).filter(Product.title_line.in_(titles))
+    result = await session.execute(query)
+    existing_in_db = {row.title_line for row in result.scalars().all()}
+    filtered_products = [product for product in products if product['title'] not in existing_in_db]
+    return filtered_products
