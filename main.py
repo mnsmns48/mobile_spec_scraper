@@ -1,14 +1,9 @@
 from contextlib import asynccontextmanager
-
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
-
-from api.errors import ValidationFailedException
 from api.handlers import register_handlers
-from api.routers import templates
 from api.views import info_router
 from config.settings import app_setup
 from database import setup_db

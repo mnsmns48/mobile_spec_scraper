@@ -1,10 +1,10 @@
 from typing import Any
-
+from sqlalchemy.orm import joinedload
 from sqlalchemy import func, select, and_, text, Column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
 
-from database.models import Product, Base
+from database.models import Product, Base, Product_Type, Brand
 from setup.binding_words import bind_words
 
 
@@ -56,13 +56,14 @@ async def query_string_formating(text_string: str) -> list:
 
 async def search_devices(session: AsyncSession,
                          query_string: str,
-                         conditions: dict[str, Any] = None) -> Product | None:
+                         conditions: dict[str, Any] = None) -> dict | None:
     query_words = await query_string_formating(text_string=query_string)
     tsquery_string = " | ".join(query_words)
     ts_query = func.to_tsquery('simple', tsquery_string)
     query = select(Product,
                    func.ts_rank(Product.title_tsv, ts_query).label('rank'),
-                   func.length(Product.title_tsv).label('length'))
+                   func.length(Product.title_tsv).label('length')).options(
+        joinedload(Product.brand), joinedload(Product.product_type))
     where_conditions = list()
     if conditions:
         for column, value in conditions.items():
@@ -87,7 +88,9 @@ async def search_devices(session: AsyncSession,
                 device_obj.setdefault(result.title, []).append(False)
         tsv_check = await check_binding_words(search_words=query_words, tsv_list=tsv_list)
         if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
-            return result
+            return {"title": result.title_line, "brand": result.brand.brand,
+                    "product_type": result.product_type.type, "info": result.info,
+                    "pros_cons": result.pros_cons}
 
 
 async def search_product_by_model(session: AsyncSession,
