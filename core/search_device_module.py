@@ -90,7 +90,7 @@ async def search_devices(session: AsyncSession,
         if all(device_obj[result.title]) and (not fail_tsv_attributes) and tsv_check:
             return {"title": result.title_line, "brand": result.brand.brand,
                     "product_type": result.product_type.type, "info": result.info,
-                    "pros_cons": result.pros_cons}
+                    "pros_cons": result.pros_cons, "source": result.source}
 
 
 async def search_product_by_model(session: AsyncSession,
