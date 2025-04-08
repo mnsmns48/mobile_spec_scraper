@@ -70,7 +70,7 @@ async def search_devices(session: AsyncSession,
             column = getattr(Product, column)
             where_conditions.append(column == value)
     query = query.filter(and_(
-        func.length(Product.title_tsv) >= 2),
+        func.length(Product.title_tsv) >= 1),
         Product.title_tsv.op('@@')(ts_query), *where_conditions)
     query = query.order_by(text('rank DESC')).limit(5)
     execute_obj = await session.execute(query)
