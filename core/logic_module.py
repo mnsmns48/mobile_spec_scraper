@@ -37,7 +37,7 @@ async def pars_link(url: str) -> None | dict:
                 parsing_result.update(
                     {'link': url,
                      'source': func.__name__,
-                     'product_type_id': product_type.id if product_type else None,
+                     'product_type_id': product_type.id if product_type else 3,
                      'brand_id': brand.id})
                 return parsing_result
             return {'error': True, 'response': parsing_result['response']}
