@@ -1,7 +1,13 @@
 {% extends 'index.html' %}
 {% block content %}
 <div class="form-container">
-    <p>{{ result }}</p>
-    <p><a href="/add_url">Try Again</a></p>
+    <div class="error-icon">
+        <div class="error-message">
+            <p>
+                {{ result }}
+            </p>
+        </div>
+    </div>
+    <button class="engineering-menu-button" onclick="history.back()">Назад</button>
 </div>
 {% endblock %}

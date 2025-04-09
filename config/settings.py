@@ -1,8 +1,6 @@
-import json
 import os
 from dataclasses import dataclass
 from pathlib import Path
-
 from environs import Env
 
 root_path = Path(os.path.abspath(__file__)).parent.parent

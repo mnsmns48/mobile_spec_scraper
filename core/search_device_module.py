@@ -3,9 +3,18 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func, select, and_, text, Column
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
-
 from database.models import Product, Base, Product_Type, Brand
-from setup.binding_words import bind_words
+
+
+bind_words = [
+    'plus',
+    'pro',
+    'max',
+    'ultra',
+    'neo',
+    'lite',
+    'ne'
+]
 
 
 async def no_digits(text_str: str) -> bool:
