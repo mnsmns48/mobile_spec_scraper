@@ -25,11 +25,12 @@ class PWSettings:
 @dataclass
 class AppSetup:
     app_port: int
+    docs_url: str
 
 
 def load_var(_class: dataclass):
     env = Env()
-    env.read_env(path=f'{root_path}/setup/.env')
+    env.read_env(path=f'{root_path}/.env')
     attrs = _class.__annotations__
     kwargs = dict()
     for key, value in attrs.items():

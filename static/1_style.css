@@ -59,3 +59,13 @@ body {
     margin: 0;
     font-size: 14px;
 }
+
+.status-inserted {
+    color: Green;
+    font-weight: bold;
+}
+
+.status-updated {
+    color: darkviolet;
+    font-weight: bold;
+}

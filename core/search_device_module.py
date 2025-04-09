@@ -1,10 +1,9 @@
 from typing import Any
 from sqlalchemy.orm import joinedload
-from sqlalchemy import func, select, and_, text, Column
+from sqlalchemy import func, select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
-from database.models import Product, Base, Product_Type, Brand
-
+from database.models.product import Product, Base
 
 bind_words = [
     'plus',

@@ -1,11 +1,11 @@
 import asyncio
 import re
+from typing import List
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, Form
 from starlette.responses import HTMLResponse
 
-from api.routers import templates, info_router
-from api.schemas import Info, Link, take_form_result, ItemList
+from api.routers import templates, get_info_router as get_info, post_info_router as post_info
 from core import add_new_one
 from api.errors import ValidationFailedException
 from core.logic_module import get_nanoreview_list_for_parsing
@@ -16,17 +16,17 @@ from database.engine import db
 ############################################################### GET #################################################
 
 
-@info_router.get("/")
+@get_info.get("/")
 async def welcome(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
 
-@info_router.get("/add_url", response_class=HTMLResponse)
-async def add(request: Request):
+@get_info.get("/add_url", response_class=HTMLResponse)
+async def add_url(request: Request):
     return templates.TemplateResponse("add_url.html", {"request": request})
 
 
-@info_router.get("/engineering-menu/")
+@get_info.get("/engineering-menu/")
 async def get_engineering_menu(request: Request):
     return templates.TemplateResponse("engineering_menu.html", {"request": request})
 
@@ -34,23 +34,18 @@ async def get_engineering_menu(request: Request):
 ############################################################# POST ###############################################
 
 
-@info_router.post("/get_one/")
-async def get_one(data: Info):
-    conditions = dict()
-    for k, v in data.__dict__.items():
-        if v != 'string':
-            conditions.update({k: v})
-    conditions.pop('title')
+@post_info.post("/get_one/")
+async def get_one_item(data: str):
     async with db.scoped_session() as session:
-        result = await search_devices(session=session, query_string=data.title, conditions=conditions)
+        result = await search_devices(session=session, query_string=data)
     return result
 
 
-@info_router.post("/get_many/")
-async def get_many_items(items: ItemList):
+@post_info.post("/get_many/")
+async def get_many_items(items: List[str]):
     result = dict()
     async with db.scoped_session() as session:
-        for item in items.items:
+        for item in items:
             found = await search_devices(session=session, query_string=item)
             if found:
                 result.update({item: found})
@@ -58,29 +53,24 @@ async def get_many_items(items: ItemList):
     return result
 
 
-@info_router.post("/add_info/")
-async def add_info(link: Link):
-    conditions = dict()
-    for k, v in link.__dict__.items():
-        if v != 'string':
-            conditions.update({k: v})
-    conditions.pop('url')
+@post_info.post("/add_info/")
+async def add_info(url: str = Form(...)):
     async with db.scoped_session() as session:
-        result = await add_new_one(session=session, url=link.url, conditions=conditions)
+        result = await add_new_one(session=session, url=url)
     return result
 
 
-@info_router.post("/submit_one_url", response_class=HTMLResponse)
-async def submit_link(request: Request, form: Link = Depends(take_form_result)):
-    if not form.url:
+@post_info.post("/submit_one_url", response_class=HTMLResponse)
+async def submit_link(request: Request, url: str = Form(...)):
+    if not url:
         return templates.TemplateResponse("add_url.html", {"request": request})
-    result = await add_info(form)
+    result = await add_info(url)
     if result.get('error'):
         return templates.TemplateResponse("error.html", {"request": request, "result": result['response']})
     return templates.TemplateResponse("fetch_url.html", {"request": request, "result": result})
 
 
-@info_router.post("/submit_pars_all", response_class=HTMLResponse)
+@post_info.post("/submit_pars_all", response_class=HTMLResponse)
 async def submit_pars_all(request: Request):
     form_data = await request.form()
     url_for_pars = form_data.get("url")

@@ -1,15 +1,14 @@
 {% extends 'index.html' %}
 {% block content %}
 {% if result %}
-<div class="result-container">
-    <p><strong>Status:</strong>
+<div class="form-container">
+    <p><strong>Статус:</strong>
         <span class="{% if result.response == 'inserted' %}status-inserted{% elif result.response == 'updated' %}status-updated{% endif %}">
             {{ result.response.title() }}
         </span></p>
-    <p><strong>Url:</strong> {{ result.link }}</p>
     <p><strong>Title:</strong> {{ result.title.title() }}</p>
     <p><strong>Source:</strong> {{ result.source.title() }}</p>
-    <a href="/add_url">Gve me more</a>
+    <button class="engineering-menu-button" onclick="history.back()">Назад</button>
 </div>
 {% endif %}
 {% endblock %}

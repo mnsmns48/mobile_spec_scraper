@@ -10,7 +10,7 @@ from core.bs4 import get_bs4_func, title_result_prepare
 from core.search_device_module import search_product_by_model
 from core.utils import url_to_short_string
 from database.engine import db
-from database.models import Product, Product_Type, Brand
+from database.models.product import Product, Product_Type, Brand
 
 
 async def pars_link(url: str) -> None | dict:

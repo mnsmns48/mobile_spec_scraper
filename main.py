@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 from api.handlers import register_handlers
-from api.views import info_router
+from api.views import get_info, post_info
 from config.settings import app_setup
 from database import setup_db
 
@@ -15,13 +15,14 @@ async def lifespan(app: FastAPI):
     yield
 
 
-app = FastAPI(lifespan=lifespan, docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(lifespan=lifespan, docs_url=app_setup.docs_url)
 app.add_middleware(CORSMiddleware,
                    allow_origins=["*"],
                    allow_methods=["*"],
                    allow_headers=["*"],
                    allow_credentials=True, )
-app.include_router(router=info_router, tags=["post_views"])
+app.include_router(router=get_info)
+app.include_router(router=post_info)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 register_handlers(app)
 

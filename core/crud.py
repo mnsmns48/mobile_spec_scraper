@@ -1,12 +1,12 @@
 from datetime import datetime
-from typing import Any, Sequence, Coroutine
-from sqlalchemy import select, and_, Row
+from typing import Any, Sequence
+from sqlalchemy import select, and_
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
 from core.utils import dt_to_minute_round
-from database.models import Product, Brand
+from database.models.product import Product, Brand
 
 
 async def write_data(session: AsyncSession,
