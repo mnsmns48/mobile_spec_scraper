@@ -77,6 +77,9 @@ async def submit_pars_all(request: Request):
     pattern = r'^https://nanoreview\.net/(ru|en)/.+/all-.+$'
     if bool(re.match(pattern, url_for_pars)):
         url_list = await get_nanoreview_list_for_parsing(url=url_for_pars)
-        return templates.TemplateResponse("link_for_pars.html", {"request": request, "url_for_pars": url_list})
+        if url_list:
+            return templates.TemplateResponse("link_for_pars.html", {"request": request, "url_for_pars": url_list})
+        else:
+            return templates.TemplateResponse("no_items.html", {"request": request})
     else:
         raise ValidationFailedException(message="URL does not match the expected format")

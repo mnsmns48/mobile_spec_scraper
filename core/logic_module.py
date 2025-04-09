@@ -30,10 +30,10 @@ async def pars_link(url: str) -> None | dict:
                                                              query_string=parsed_url_string,
                                                              model=Brand,
                                                              tsv_column=Brand.brand_depends_tsv)
+            if not parsing_result.get('error'):
                 parsing_result = await title_result_prepare(bs_result=parsing_result)
                 if not brand:
                     brand = await add_new_brand(session=session, title=parsing_result['title_line'])
-            if not parsing_result.get('error'):
                 parsing_result.update(
                     {'link': url,
                      'source': func.__name__,

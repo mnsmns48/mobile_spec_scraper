@@ -1,17 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigitalTube</title>
-    <link href="{{ url_for('static', path='/error.css') }}" rel="stylesheet"/>
-    <link id="favicon" rel="icon" type="image/x-icon" href="{{ url_for('static', path='/favicon3.ico') }}"/>
-</head>
-<body>
+{% extends "base.html" %}
+
+{% block content %}
 <div class="error-container">
     <div class="error-icon">Ошибка</div>
     <div class="error-message">URL не соответствует ожидаемому формату</div>
     <button class="back-button" onclick="history.back()">Назад</button>
 </div>
-</body>
-</html>
+{% endblock %}
