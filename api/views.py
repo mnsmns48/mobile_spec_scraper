@@ -6,6 +6,7 @@ from fastapi import Depends, Request, Form
 from starlette.responses import HTMLResponse
 
 from api.routers import templates, get_info_router as get_info, post_info_router as post_info
+from api.schemas import ItemList
 from core import add_new_one
 from api.errors import ValidationFailedException
 from core.logic_module import get_nanoreview_list_for_parsing
@@ -42,10 +43,10 @@ async def get_one_item(data: str):
 
 
 @post_info.post("/get_many/")
-async def get_many_items(items: List[str]):
+async def get_many_items(items: ItemList):
     result = dict()
     async with db.scoped_session() as session:
-        for item in items:
+        for item in items.items:
             found = await search_devices(session=session, query_string=item)
             if found:
                 result.update({item: found})
