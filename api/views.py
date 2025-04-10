@@ -1,7 +1,5 @@
 import asyncio
 import re
-from typing import List
-
 from fastapi import Depends, Request, Form
 from starlette.responses import HTMLResponse
 
