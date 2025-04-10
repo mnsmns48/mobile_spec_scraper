@@ -2,8 +2,15 @@ import os
 from dataclasses import dataclass
 from pathlib import Path
 from environs import Env
+from pydantic import BaseModel
 
 root_path = Path(os.path.abspath(__file__)).parent.parent
+
+
+class AuthJWT(BaseModel):
+    private_key_path: Path = root_path / "certs" / "jwt-private.pem"
+    public_key_path: Path = root_path / "certs" / "jwt-public.pem"
+    algorithm = "RS256"
 
 
 @dataclass
@@ -42,3 +49,4 @@ def load_var(_class: dataclass):
 db_conf = load_var(_class=DBSettings)
 pw_conf = load_var(_class=PWSettings)
 app_setup = load_var(_class=AppSetup)
+auth_conf = AuthJWT()
