@@ -32,10 +32,7 @@ class DataBase:
 
     @asynccontextmanager
     async def scoped_session(self) -> AsyncGenerator[AsyncSession | Any, Any]:
-        session = async_scoped_session(
-            session_factory=self.session_factory,
-            scopefunc=current_task,
-        )
+        session = async_scoped_session(session_factory=self.session_factory, scopefunc=current_task)
         try:
             async with session() as sess:
                 yield sess
