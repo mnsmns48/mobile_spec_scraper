@@ -33,6 +33,11 @@ class AppSetup:
     docs_url: str
 
 
+@dataclass
+class Api:
+    bearer_token_url: str = "/auth/login"
+
+
 def load_var(_class: dataclass):
     env = Env()
     env.read_env(path=f'{root_path}/.env')
@@ -45,6 +50,7 @@ def load_var(_class: dataclass):
 
 
 var_types = VarTypes()
+api_config = Api()
 db_conf = load_var(_class=DBSettings)
 pw_conf = load_var(_class=PWSettings)
 app_setup = load_var(_class=AppSetup)

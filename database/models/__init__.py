@@ -3,9 +3,11 @@ __all__ = (
     "Product",
     "Product_Type",
     "Brand",
-    "User"
+    "User",
+    "AccessToken"
 )
 
 from .base import Base
 from .product import Product, Product_Type, Brand
 from .user import User
+from .access_token import AccessToken
