@@ -7,6 +7,11 @@ root_path = Path(os.path.abspath(__file__)).parent.parent
 
 
 @dataclass
+class VarTypes:
+    UserIdType = int
+
+
+@dataclass
 class DBSettings:
     db_username: str
     db_password: str
@@ -39,6 +44,7 @@ def load_var(_class: dataclass):
     return _class(**kwargs)
 
 
+var_types = VarTypes()
 db_conf = load_var(_class=DBSettings)
 pw_conf = load_var(_class=PWSettings)
 app_setup = load_var(_class=AppSetup)
