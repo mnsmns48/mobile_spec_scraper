@@ -38,6 +38,13 @@ class Api:
     bearer_token_url: str = "/auth/login"
 
 
+@dataclass
+class AccessToken:
+    lifetime_seconds = 3600
+    reset_password_token_secret: str
+    verification_token_secret: str
+
+
 def load_var(_class: dataclass):
     env = Env()
     env.read_env(path=f'{root_path}/.env')
@@ -49,6 +56,7 @@ def load_var(_class: dataclass):
     return _class(**kwargs)
 
 
+access_token_cfg = AccessToken()
 var_types = VarTypes()
 api_config = Api()
 db_conf = load_var(_class=DBSettings)
