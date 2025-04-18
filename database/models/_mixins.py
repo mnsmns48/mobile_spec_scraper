@@ -11,7 +11,6 @@ class IdIntPkMixin:
 
 class AdditionalUserFields:
     phone_number: Mapped[int]
-    telegram_id: Mapped[int] = mapped_column(nullable=True)
     vk_id: Mapped[int] = mapped_column(nullable=True)
     full_name: Mapped[str] = mapped_column(nullable=True)
     birthday: Mapped[datetime] = mapped_column(DateTime(timezone=False), nullable=True)
