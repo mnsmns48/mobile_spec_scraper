@@ -41,8 +41,8 @@ class Api:
 @dataclass
 class AccessToken:
     lifetime_seconds = 3600
-    reset_password_token_secret: str
-    verification_token_secret: str
+    # reset_password_token_secret: str
+    # verification_token_secret: str
 
 
 def load_var(_class: dataclass):
