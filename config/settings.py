@@ -35,7 +35,7 @@ class AppSetup:
 
 @dataclass
 class Api:
-    bearer_token_url: str = "/auth/login"
+    bearer_token_url: str = "/login"
 
 
 @dataclass

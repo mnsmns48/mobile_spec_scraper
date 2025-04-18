@@ -40,6 +40,8 @@ class DataBase:
             await session.remove()
 
 
+
+
 db = DataBase(settings.db_url, settings.db_echo)
 
 
