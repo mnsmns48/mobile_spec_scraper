@@ -40,9 +40,9 @@ class Api:
 
 @dataclass
 class AccessToken:
-    lifetime_seconds = 3600
-    # reset_password_token_secret: str
-    # verification_token_secret: str
+    reset_password_token_secret: str
+    verification_token_secret: str
+    lifetime_seconds: int
 
 
 def load_var(_class: dataclass):
@@ -56,9 +56,9 @@ def load_var(_class: dataclass):
     return _class(**kwargs)
 
 
-access_token_cfg = AccessToken()
 var_types = VarTypes()
 api_config = Api()
 db_conf = load_var(_class=DBSettings)
 pw_conf = load_var(_class=PWSettings)
 app_setup = load_var(_class=AppSetup)
+access_token_cfg = load_var(_class=AccessToken)
