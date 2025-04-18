@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.staticfiles import StaticFiles
 from api.handlers import register_handlers
+from api.routers import auth_router
 from api.views import get_info, post_info
 from config.settings import app_setup
 from database import setup_db
@@ -23,6 +24,7 @@ app.add_middleware(CORSMiddleware,
                    allow_credentials=True, )
 app.include_router(router=get_info)
 app.include_router(router=post_info)
+app.include_router(router=auth_router)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 register_handlers(app)
 
