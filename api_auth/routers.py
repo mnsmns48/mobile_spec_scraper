@@ -14,6 +14,7 @@ auth_router.include_router(fastapi_users.get_auth_router(authentication_backend)
 auth_router.include_router(fastapi_users.get_register_router(UserRead, UserCreate))
 users_router = APIRouter(tags=['Users'], prefix='/users')
 users_router.include_router(fastapi_users.get_users_router(UserRead, UserCreate))
-
+users_router.include_router(fastapi_users.get_verify_router(UserRead))
+users_router.include_router(fastapi_users.get_reset_password_router())
 auth_api_router.include_router(auth_router)
 auth_api_router.include_router(users_router)

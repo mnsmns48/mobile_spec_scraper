@@ -14,9 +14,10 @@ from templates import templates
 ############################################################### GET #################################################
 
 get_info = APIRouter(tags=['Get'])
+start_rt = APIRouter(tags=['Get'])
 
 
-@get_info.get("/")
+@start_rt.get("/")
 async def welcome(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 

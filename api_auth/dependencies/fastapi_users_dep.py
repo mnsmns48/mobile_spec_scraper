@@ -6,3 +6,5 @@ from config.settings import var_types
 from database.models import User
 
 fastapi_users = FastAPIUsers[User, var_types.UserIdType](get_user_manager, [authentication_backend])
+
+current_super_user = fastapi_users.current_user(active=True, verified=True, superuser=True)
