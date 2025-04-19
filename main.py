@@ -1,9 +1,10 @@
 import uvicorn
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
+from api_auth.dependencies.fastapi_users_dep import current_super_user
 from api_auth.routers import auth_api_router
 from api_basic.routers import basic_router
 from api_basic.handlers import register_handlers
