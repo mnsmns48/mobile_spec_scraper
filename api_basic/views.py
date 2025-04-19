@@ -2,7 +2,6 @@ import asyncio
 import re
 from fastapi import Request, Form, APIRouter
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
 from api_basic.schemas import ItemList
 
 from api_basic.errors import ValidationFailedException
@@ -10,11 +9,9 @@ from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
 from core.basic.search_device_module import search_devices
 
 from database.engine import db
-
-templates = Jinja2Templates(directory="templates")
+from templates import templates
 
 ############################################################### GET #################################################
-
 
 get_info = APIRouter(tags=['Get'])
 

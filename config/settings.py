@@ -34,11 +34,6 @@ class AppSetup:
 
 
 @dataclass
-class Api:
-    bearer_token_url: str = "/login"
-
-
-@dataclass
 class AccessToken:
     reset_password_token_secret: str
     verification_token_secret: str
@@ -56,8 +51,8 @@ def load_var(_class: dataclass):
     return _class(**kwargs)
 
 
+bearer_token_url: str = "/login"
 var_types = VarTypes()
-api_config = Api()
 db_conf = load_var(_class=DBSettings)
 pw_conf = load_var(_class=PWSettings)
 app_setup = load_var(_class=AppSetup)
