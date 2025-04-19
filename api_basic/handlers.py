@@ -1,6 +1,7 @@
 from fastapi import FastAPI, HTTPException
 from starlette.requests import Request
-from api.routers import templates
+
+from api_basic.views import templates
 
 
 async def validation_failed_exception_handler(request: Request, exc: HTTPException):

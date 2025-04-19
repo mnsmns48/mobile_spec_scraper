@@ -4,11 +4,11 @@ from typing import Any, Callable
 from bs4 import BeautifulSoup
 from sqlalchemy.ext.asyncio import AsyncSession
 from config import logger
-from core.crud import write_data, add_new_brand, get_missing_products
-from core.pw_module import open_link
-from core.bs4 import get_bs4_func, title_result_prepare
-from core.search_device_module import search_product_by_model
-from core.utils import url_to_short_string
+from core.basic.crud import write_data, add_new_brand, get_missing_products
+from core.basic.pw_module import open_link
+from core.basic.bs4 import get_bs4_func, title_result_prepare
+from core.basic.search_device_module import search_product_by_model
+from core.basic.utils import url_to_short_string
 from database.engine import db
 from database.models.product import Product, Product_Type, Brand
 

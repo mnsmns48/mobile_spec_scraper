@@ -5,7 +5,7 @@ from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.decl_api import DeclarativeBase
 
-from core.utils import dt_to_minute_round
+from core.basic.utils import dt_to_minute_round
 from database.models.product import Product, Brand
 
 

@@ -1,18 +1,22 @@
 import asyncio
 import re
-from fastapi import Depends, Request, Form
-from starlette.responses import HTMLResponse
+from fastapi import Request, Form, APIRouter
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
+from api_basic.schemas import ItemList
 
-from api.routers import templates, get_info_router as get_info, post_info_router as post_info
-from api.schemas import ItemList
-from core import add_new_one
-from api.errors import ValidationFailedException
-from core.logic_module import get_nanoreview_list_for_parsing
-from core.search_device_module import search_devices
+from api_basic.errors import ValidationFailedException
+from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
+from core.basic.search_device_module import search_devices
+
 from database.engine import db
 
+templates = Jinja2Templates(directory="templates")
 
 ############################################################### GET #################################################
+
+
+get_info = APIRouter(tags=['Get'])
 
 
 @get_info.get("/")
@@ -31,6 +35,9 @@ async def get_engineering_menu(request: Request):
 
 
 ############################################################# POST ###############################################
+
+
+post_info = APIRouter(tags=['Post'])
 
 
 @post_info.post("/get_one/")
