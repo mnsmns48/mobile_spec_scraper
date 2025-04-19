@@ -3,7 +3,7 @@ import json
 from playwright.async_api import Playwright, Browser, Error
 
 from config import pw_conf, logger
-from core.utils import get_proxy_file, check_proxy_availability
+from core.basic.utils import get_proxy_file, check_proxy_availability
 
 
 async def run_browser(playwright: Playwright) -> Browser:

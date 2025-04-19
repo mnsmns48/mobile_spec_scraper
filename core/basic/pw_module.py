@@ -2,7 +2,7 @@ import logging
 
 from playwright.async_api import async_playwright
 
-from core.browser import run_browser
+from core.basic.browser import run_browser
 
 
 async def open_link(url: str) -> str | dict:

@@ -2,7 +2,6 @@ from asyncio import current_task
 from contextlib import asynccontextmanager
 from typing import Any, AsyncGenerator
 
-
 import asyncpg
 from pydantic_settings import BaseSettings
 from sqlalchemy import NullPool
@@ -32,15 +31,16 @@ class DataBase:
 
     @asynccontextmanager
     async def scoped_session(self) -> AsyncGenerator[AsyncSession | Any, Any]:
-        session = async_scoped_session(
-            session_factory=self.session_factory,
-            scopefunc=current_task,
-        )
+        session = async_scoped_session(session_factory=self.session_factory, scopefunc=current_task)
         try:
             async with session() as sess:
                 yield sess
         finally:
             await session.remove()
+
+    async def session_getter(self) -> AsyncGenerator[AsyncSession, None]:
+        async with self.session_factory() as session:
+            yield session
 
 
 db = DataBase(settings.db_url, settings.db_echo)
