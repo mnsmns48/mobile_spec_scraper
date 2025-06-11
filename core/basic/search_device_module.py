@@ -1,3 +1,4 @@
+import re
 from typing import Any
 from sqlalchemy.orm import joinedload
 from sqlalchemy import func, select, and_, text
@@ -100,9 +101,15 @@ async def search_devices(session: AsyncSession,
                     "product_type": result.product_type.type, "info": result.info,
                     "pros_cons": result.pros_cons, "source": result.source}
 
+def format_tsquery(query_string: str) -> str:
+    query_string = query_string.lower().replace('+', ' plus')
+    query_string = re.sub(r"[^\w\s]", "", query_string)
+    query_string = query_string.replace(" ", " | ")
+    return query_string
+
 
 async def search_device_forced(session: AsyncSession, query_string: str):
-    ts_query = func.to_tsquery('simple', query_string.replace('+', ' plus').lower())
+    ts_query = func.to_tsquery('simple', format_tsquery(query_string))
     query = select(Product,
                    func.ts_rank(Product.title_tsv, ts_query).label('rank'),
                    func.length(Product.title_tsv).label('length')).options(
