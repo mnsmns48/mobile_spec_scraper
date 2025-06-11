@@ -102,8 +102,7 @@ async def search_devices(session: AsyncSession,
 
 
 async def search_device_forced(session: AsyncSession, query_string: str):
-    tsquery_string = " | ".join(query_string.split(' '))
-    ts_query = func.to_tsquery('simple', tsquery_string)
+    ts_query = func.to_tsquery('simple', query_string.replace('+', ' plus').lower())
     query = select(Product,
                    func.ts_rank(Product.title_tsv, ts_query).label('rank'),
                    func.length(Product.title_tsv).label('length')).options(
