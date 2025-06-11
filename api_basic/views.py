@@ -1,12 +1,14 @@
 import asyncio
 import re
-from fastapi import Request, Form, APIRouter
+from fastapi import Request, Form, APIRouter, Depends
 from fastapi.responses import HTMLResponse
+from sqlalchemy.ext.asyncio import AsyncSession
+
 from api_basic.schemas import ItemList
 
 from api_basic.errors import ValidationFailedException
 from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
-from core.basic.search_device_module import search_devices
+from core.basic.search_device_module import search_devices, search_device_forced
 
 from database.engine import db
 from templates import templates
@@ -57,11 +59,20 @@ async def get_many_items(items: ItemList):
     return result
 
 
+@post_info.post("/get_itemlist/")
+async def get_many_items(item: str, session: AsyncSession = Depends(db.session_getter)):
+    found = await search_device_forced(session=session, query_string=item)
+    return {'items': found}
+
+
 @post_info.post("/add_info/")
 async def add_info(url: str = Form(...)):
     async with db.scoped_session() as session:
         result = await add_new_one(session=session, url=url)
     return result
+
+
+
 
 
 @post_info.post("/submit_one_url", response_class=HTMLResponse)

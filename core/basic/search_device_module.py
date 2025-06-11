@@ -101,6 +101,19 @@ async def search_devices(session: AsyncSession,
                     "pros_cons": result.pros_cons, "source": result.source}
 
 
+async def search_device_forced(session: AsyncSession, query_string: str):
+    tsquery_string = " | ".join(query_string.split(' '))
+    ts_query = func.to_tsquery('simple', tsquery_string)
+    query = select(Product,
+                   func.ts_rank(Product.title_tsv, ts_query).label('rank'),
+                   func.length(Product.title_tsv).label('length')).options(
+        joinedload(Product.brand), joinedload(Product.product_type))
+    query = query.order_by(text('rank DESC')).limit(10)
+    execute_obj = await session.execute(query)
+    result = execute_obj.scalars().all()
+    return {'result': result}
+
+
 async def search_product_by_model(session: AsyncSession,
                                   query_string: str,
                                   model: type(Base), tsv_column: InstrumentedAttribute) -> type(Base) | None:
