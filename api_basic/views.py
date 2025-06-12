@@ -8,9 +8,11 @@ from api_basic.schemas import ItemList
 
 from api_basic.errors import ValidationFailedException
 from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
-from core.basic.search_device_module import search_devices, search_device_forced
+from core.basic.search_device_module import search_devices, search_device_forced, search_product_by_model, \
+    all_items_by_brand
 
 from database.engine import db
+from database.models import Brand
 from templates import templates
 
 ############################################################### GET #################################################
@@ -61,8 +63,24 @@ async def get_many_items(items: ItemList):
 
 @post_info.post("/get_itemlist/")
 async def get_many_items(item: str, session: AsyncSession = Depends(db.session_getter)):
-    found = await search_device_forced(session=session, query_string=item)
-    return {'items': found}
+    result = await search_device_forced(session=session, query_string=item)
+    return result
+
+
+@post_info.post("/get_brand/")
+async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.session_getter)):
+    result = await search_product_by_model(session=session,
+                                           query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
+    return result
+
+
+@post_info.post("/get_items_by_brand/")
+async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.session_getter)):
+    brand = await search_product_by_model(session=session,
+                                          query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
+    if brand:
+        result = await all_items_by_brand(session=session, brand=brand)
+        return result
 
 
 @post_info.post("/add_info/")
@@ -70,9 +88,6 @@ async def add_info(url: str = Form(...)):
     async with db.scoped_session() as session:
         result = await add_new_one(session=session, url=url)
     return result
-
-
-
 
 
 @post_info.post("/submit_one_url", response_class=HTMLResponse)

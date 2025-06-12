@@ -4,7 +4,7 @@ from sqlalchemy.orm import joinedload
 from sqlalchemy import func, select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
-from database.models.product import Product, Base
+from database.models.product import Product, Base, Brand
 
 bind_words = [
     'plus',
@@ -101,6 +101,7 @@ async def search_devices(session: AsyncSession,
                     "product_type": result.product_type.type, "info": result.info,
                     "pros_cons": result.pros_cons, "source": result.source}
 
+
 def format_tsquery(query_string: str) -> str:
     query_string = query_string.lower().replace('+', ' plus')
     query_string = re.sub(r"[^\w\s]", "", query_string)
@@ -133,3 +134,10 @@ async def search_product_by_model(session: AsyncSession,
     execute_obj = await session.execute(query)
     for line in execute_obj.all():
         return line[0]
+
+
+async def all_items_by_brand(session: AsyncSession, brand: Brand):
+    query = select(Product).where(Product.brand == brand)
+    execute = await session.execute(query)
+    result = execute.scalars().all()
+    return result

@@ -9,10 +9,6 @@ from api_basic.handlers import register_handlers
 
 from config.settings import app_setup
 
-
-
-
-
 app = FastAPI(docs_url=app_setup.docs_url)
 app.add_middleware(CORSMiddleware,
                    allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
