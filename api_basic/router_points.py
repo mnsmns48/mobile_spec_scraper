@@ -45,7 +45,11 @@ post_info = APIRouter(tags=['Post'])
 @post_info.post("/get_one/")
 async def get_one_item(data: str):
     async with db.scoped_session() as session:
-        result = await search_devices(session=session, query_string=data)
+        brand = await search_product_by_model(session=session,
+                                              query_string=data, model=Brand, tsv_column=Brand.brand_depends_tsv)
+        if brand:
+            conditions = {'brand_id': brand.id}
+        result = await search_devices(session=session, query_string=data, conditions=conditions)
     return result
 
 

@@ -1,9 +1,9 @@
 from fastapi import APIRouter, Depends
 
 from api_auth.dependencies.fastapi_users_dep import current_super_user
-from api_basic.views import (post_info as post_info_router,
-                             get_info as get_info_router,
-                             start_rt as start_router)
+from api_basic.router_points import (post_info as post_info_router,
+                                     get_info as get_info_router,
+                                     start_rt as start_router)
 
 basic_router = APIRouter()
 

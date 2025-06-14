@@ -76,8 +76,8 @@ async def search_devices(session: AsyncSession,
     where_conditions = list()
     if conditions:
         for column, value in conditions.items():
-            column = getattr(Product, column)
-            where_conditions.append(column == value)
+            column_attr = getattr(Product, column)
+            where_conditions.append(column_attr == value)
     query = query.filter(and_(
         func.length(Product.title_tsv) >= 1),
         Product.title_tsv.op('@@')(ts_query), *where_conditions)
