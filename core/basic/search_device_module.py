@@ -1,10 +1,10 @@
 import re
 from typing import Any
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy import func, select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
-from database.models.product import Product, Base, Brand
+from database.models.product import Product, Base, Brand, Product_Type
 
 bind_words = [
     'plus',
@@ -136,8 +136,22 @@ async def search_product_by_model(session: AsyncSession,
         return line[0]
 
 
-async def all_items_by_brand(session: AsyncSession, brand: Brand):
-    query = select(Product).where(Product.brand == brand)
-    execute = await session.execute(query)
-    result = execute.scalars().all()
+async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
+    stmt = (select(Product.title,
+                   Brand.brand.label("brand_name"),
+                   Product_Type.type.label("ptype"),
+                   Product.info,
+                   Product.pros_cons,
+                   Product.source).join(Brand, Product.brand_id == Brand.id)
+            .join(Product_Type, Product.product_type_id == Product_Type.id)
+            .where(Brand.id == brand.id))
+    rows = (await session.execute(stmt)).all()
+    result = list()
+    for line in rows:
+        result.append(
+            {"title": line.title,
+             "brand": line.brand_name,
+             "product_type": line.ptype,
+             "info": line.info,
+             "pros_cons": line.pros_cons})
     return result
