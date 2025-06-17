@@ -137,7 +137,7 @@ async def search_product_by_model(session: AsyncSession,
 
 
 async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
-    stmt = (select(Product.title,
+    stmt = (select(Product.title_line,
                    Brand.brand.label("brand_name"),
                    Product_Type.type.label("ptype"),
                    Product.info,
