@@ -149,7 +149,7 @@ async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
     result = list()
     for line in rows:
         result.append(
-            {"title": line.title,
+            {"title": line.title_line,
              "brand": line.brand_name,
              "product_type": line.ptype,
              "info": line.info,
