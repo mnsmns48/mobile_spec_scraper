@@ -16,6 +16,8 @@ bind_words = [
     'ne'
 ]
 
+BAD_CHARS_RE = re.compile(r"[^\w\s]+", flags=re.UNICODE)
+
 
 async def no_digits(text_str: str) -> bool:
     for char in text_str:
@@ -44,29 +46,30 @@ async def check_binding_words(search_words: list, tsv_list: list) -> bool:
     return True
 
 
-async def query_string_formating(text_string: str) -> list:
-    input_string = text_string.replace('+', ' plus')
-    working_string = input_string.lower()
-    result = []
+def query_string_formating(text_string: str) -> list[str]:
+    cleaned = text_string.replace("+", " plus ")
+    cleaned = BAD_CHARS_RE.sub(" ", cleaned.lower())
+    result: list[str] = list()
     i = 0
-    while i < len(working_string):
+    while i < len(cleaned):
         matched = False
-        for word in bind_words:
-            if working_string[i:i + len(word)] == word:
-                result.append(input_string[i:i + len(word)].lower())
-                i += len(word)
+        for phrase in bind_words:
+            if cleaned.startswith(phrase, i):
+                result.append(phrase)
+                i += len(phrase)
                 matched = True
                 break
         if not matched:
-            result.append(input_string[i].lower())
+            result.append(cleaned[i])
             i += 1
-    return ''.join(result).split()
+    tokens = [tok for tok in "".join(result).split() if len(tok) > 1]
+    return tokens
 
 
 async def search_devices(session: AsyncSession,
                          query_string: str,
                          conditions: dict[str, Any] = None) -> dict | None:
-    query_words = await query_string_formating(text_string=query_string)
+    query_words = query_string_formating(text_string=query_string)
     tsquery_string = " | ".join(query_words)
     ts_query = func.to_tsquery('simple', tsquery_string)
     query = select(Product,
@@ -102,11 +105,11 @@ async def search_devices(session: AsyncSession,
                     "pros_cons": result.pros_cons, "source": result.source}
 
 
-def format_tsquery(query_string: str) -> str:
-    query_string = query_string.lower().replace('+', ' plus')
-    query_string = re.sub(r"[^\w\s]", "", query_string)
-    query_string = query_string.replace(" ", " | ")
-    return query_string
+def format_tsquery(input_string: str) -> list:
+    cleaned = input_string.lower().replace("+", " plus ")
+    cleaned = BAD_CHARS_RE.sub(" ", cleaned)
+    tokens = [tok for tok in cleaned.split() if len(tok) > 1]
+    return tokens
 
 
 async def search_device_forced(session: AsyncSession, query_string: str):
@@ -124,7 +127,7 @@ async def search_device_forced(session: AsyncSession, query_string: str):
 async def search_product_by_model(session: AsyncSession,
                                   query_string: str,
                                   model: type(Base), tsv_column: InstrumentedAttribute) -> type(Base) | None:
-    tsquery_string = " | ".join(query_string.split())
+    tsquery_string = " | ".join(format_tsquery(query_string))
     ts_query = func.to_tsquery('simple', tsquery_string)
     query = select(model,
                    func.ts_rank(tsv_column, ts_query).label('rank'),
