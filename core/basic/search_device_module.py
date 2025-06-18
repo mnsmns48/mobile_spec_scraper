@@ -108,7 +108,7 @@ async def search_devices(session: AsyncSession,
 def format_tsquery(input_string: str) -> list:
     cleaned = input_string.lower().replace("+", " plus ")
     cleaned = BAD_CHARS_RE.sub(" ", cleaned)
-    tokens = [tok for tok in cleaned.split() if len(tok) > 1]
+    tokens = [tok for tok in cleaned.split()]
     return tokens
 
 
