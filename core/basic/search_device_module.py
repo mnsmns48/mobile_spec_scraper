@@ -62,7 +62,7 @@ def query_string_formating(text_string: str) -> list[str]:
         if not matched:
             result.append(cleaned[i])
             i += 1
-    tokens = [tok for tok in "".join(result).split() if len(tok) > 1]
+    tokens = [tok for tok in "".join(result).split()]
     return tokens
 
 
