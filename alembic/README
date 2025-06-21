@@ -1,3 +1,9 @@
 alembic revision --autogenerate -m "message"
 
 alembic upgrade head
+
+ALTER TABLE product
+  ALTER COLUMN info TYPE JSONB USING info::jsonb;
+
+ALTER TABLE product
+  ALTER COLUMN pros_cons TYPE JSONB USING pros_cons::jsonb;

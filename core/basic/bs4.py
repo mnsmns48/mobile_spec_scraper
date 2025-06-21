@@ -70,7 +70,7 @@ async def gsmarena(soup: BeautifulSoup, url: str) -> dict:
         info.append({category.getText(): category_dict})
     if info:
         title = soup.find(name='h1', attrs={'class': 'specs-phone-name-title'}).getText()
-        return {'title': title, 'info': json.dumps(info, indent=4)}
+        return {'title': title, 'info': info}
     else:
         return generate_bs4_info_parsing(url=url)
 
@@ -88,7 +88,7 @@ async def nanoreview(soup: BeautifulSoup, url: str) -> dict:
         info.append({title_category.getText(): category_dict})
     if info:
         title = soup.find(name='h1', attrs={'class': 'title-h1'}).getText()
-        result = {'title': title, 'info': json.dumps(info, indent=4)}
+        result = {'title': title, 'info': info}
         advantage = [i.find_previous().getText() for i in soup.find_all(class_='icn-plus-css')]
         disadvantage = [i.find_previous().getText() for i in soup.find_all(class_='icn-minus-css')]
         if advantage or disadvantage:
