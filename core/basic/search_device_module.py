@@ -155,6 +155,7 @@ async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
             {"title": line.title_line,
              "brand": line.brand_name,
              "product_type": line.ptype,
+             "source": line.source,
              "info": line.info,
              "pros_cons": line.pros_cons})
     return result
