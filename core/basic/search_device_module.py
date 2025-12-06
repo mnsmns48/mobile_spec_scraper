@@ -1,6 +1,6 @@
 import re
 from typing import Any
-from sqlalchemy.orm import joinedload, selectinload
+from sqlalchemy.orm import joinedload
 from sqlalchemy import func, select, and_, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import InstrumentedAttribute
@@ -139,23 +139,33 @@ async def search_product_by_model(session: AsyncSession,
         return line[0]
 
 
-async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
-    stmt = (select(Product.title_line,
-                   Brand.brand.label("brand_name"),
-                   Product_Type.type.label("ptype"),
-                   Product.info,
-                   Product.pros_cons,
-                   Product.source).join(Brand, Product.brand_id == Brand.id)
+async def fetch_items_from_post(session: AsyncSession, brand: str | None, ptype: str | None) -> list[dict]:
+    stmt = (select(
+        Product.title_line,
+        Brand.brand.label("brand_name"),
+        Product_Type.type.label("ptype"),
+        Product.info,
+        Product.pros_cons,
+        Product.source)
+            .join(Brand, Product.brand_id == Brand.id)
             .join(Product_Type, Product.product_type_id == Product_Type.id)
-            .where(Brand.id == brand.id))
+            )
+
+    if brand:
+        stmt = stmt.where(Brand.brand == brand)
+
+    if ptype:
+        stmt = stmt.where(Product_Type.type == ptype)
+
     rows = (await session.execute(stmt)).all()
-    result = list()
-    for line in rows:
-        result.append(
-            {"title": line.title_line,
-             "brand": line.brand_name,
-             "product_type": line.ptype,
-             "source": line.source,
-             "info": line.info,
-             "pros_cons": line.pros_cons})
-    return result
+
+    return [{
+        "title": line.title_line,
+        "brand": line.brand_name,
+        "product_type": line.ptype,
+        "source": line.source,
+        "info": line.info,
+        "pros_cons": line.pros_cons,
+    }
+        for line in rows
+    ]
