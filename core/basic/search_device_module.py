@@ -139,43 +139,23 @@ async def search_product_by_model(session: AsyncSession,
         return line[0]
 
 
-async def fetch_items_from_post(
-    session: AsyncSession,
-    brand: str | None,
-    ptype: str | None
-) -> list[dict]:
-    stmt = (
-        select(
-            Product.title_line,
-            Brand.brand.label("brand_name"),
-            Product_Type.type.label("ptype"),
-            Product.info,
-            Product.pros_cons,
-            Product.source,
-        )
-        .select_from(Product)
-        .join(Brand, Product.brand_id == Brand.id)
-        .join(Product_Type, Product.product_type_id == Product_Type.id)
-    )
-
-    if brand is not None:
-        stmt = stmt.where(Brand.brand == brand)
-
-    if ptype is not None:
-        stmt = stmt.where(Product_Type.type == ptype)
-
-    result = await session.execute(stmt)
-    rows = result.all()
-
-    return [
-        {
-            "title": row.title_line,
-            "brand": row.brand_name,
-            "product_type": row.ptype,
-            "source": row.source,
-            "info": row.info,
-            "pros_cons": row.pros_cons,
-        }
-        for row in rows
-    ]
-
+async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
+    stmt = (select(Product.title_line,
+                   Brand.brand.label("brand_name"),
+                   Product_Type.type.label("ptype"),
+                   Product.info,
+                   Product.pros_cons,
+                   Product.source).join(Brand, Product.brand_id == Brand.id)
+            .join(Product_Type, Product.product_type_id == Product_Type.id)
+            .where(Brand.id == brand.id))
+    rows = (await session.execute(stmt)).all()
+    result = list()
+    for line in rows:
+        result.append(
+            {"title": line.title_line,
+             "brand": line.brand_name,
+             "product_type": line.ptype,
+             "source": line.source,
+             "info": line.info,
+             "pros_cons": line.pros_cons})
+    return result

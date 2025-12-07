@@ -1,18 +1,18 @@
 import asyncio
 import re
-from fastapi import Request, Form, APIRouter, Depends, HTTPException
+from fastapi import Request, Form, APIRouter, Depends
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from api_basic.schemas import ItemList, ItemInfoRequest
+from api_basic.schemas import ItemList
 
 from api_basic.errors import ValidationFailedException
 from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
-from core.basic.search_device_module import search_devices, search_device_forced, search_product_by_model, \
-    fetch_items_from_post
+from core.basic.search_device_module import (search_devices,
+                                             search_device_forced, search_product_by_model, all_items_by_brand)
 
 from database.engine import db
-from database.models import Brand, Product_Type
+from database.models import Brand
 from templates import templates
 
 ############################################################### GET #################################################
@@ -78,33 +78,13 @@ async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.
     return result
 
 
-@post_info.post("/fetch_item_full_info/")
-async def fetch_item_full_info(payload: ItemInfoRequest, session: AsyncSession = Depends(db.session_getter)):
-    if payload.brand:
-        brand_str = payload.brand
-    else:
-        brand_obj = await search_product_by_model(
-            session=session,
-            query_string=payload.title,
-            model=Brand,
-            tsv_column=Brand.brand_depends_tsv
-        )
-        brand_str = brand_obj.brand if brand_obj else None
-    if payload.type:
-        type_str = payload.type
-    else:
-        ptype_obj = await search_product_by_model(
-            session=session,
-            query_string=payload.title,
-            model=Product_Type,
-            tsv_column=Product_Type.kind_tsv
-        )
-        type_str = ptype_obj.type if ptype_obj else None
-    print('brand_str', brand_str, 'type_str', type_str)
-    if type_str and brand_str:
-        result = await fetch_items_from_post(session=session, brand=brand_str, ptype=type_str)
+@post_info.post("/get_items_by_brand/")
+async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.session_getter)):
+    brand = await search_product_by_model(session=session,
+                                          query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
+    if brand:
+        result = await all_items_by_brand(session=session, brand=brand)
         return result
-    raise HTTPException(status_code=502, detail="Данные не найдены")
 
 
 @post_info.post("/add_info/")
