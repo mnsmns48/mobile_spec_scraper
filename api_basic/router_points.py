@@ -1,6 +1,6 @@
 import asyncio
 import re
-from fastapi import Request, Form, APIRouter, Depends
+from fastapi import Request, Form, APIRouter, Depends, HTTPException
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -79,7 +79,7 @@ async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.
 
 
 @post_info.post("/fetch_item_full_info/")
-async def get_brand_by_searchline(payload: ItemInfoRequest, session: AsyncSession = Depends(db.session_getter)):
+async def fetch_item_full_info(payload: ItemInfoRequest, session: AsyncSession = Depends(db.session_getter)):
     if payload.brand:
         brand_str = payload.brand
     else:
@@ -100,9 +100,11 @@ async def get_brand_by_searchline(payload: ItemInfoRequest, session: AsyncSessio
             tsv_column=Product_Type.kind_tsv
         )
         type_str = ptype_obj.type if ptype_obj else None
-
-    result = await fetch_items_from_post(session=session, brand=brand_str, ptype=type_str)
-    return result
+    print('brand_str', brand_str, 'type_str', type_str)
+    if type_str and brand_str:
+        result = await fetch_items_from_post(session=session, brand=brand_str, ptype=type_str)
+        return result
+    raise HTTPException(status_code=502, detail="Данные не найдены")
 
 
 @post_info.post("/add_info/")
