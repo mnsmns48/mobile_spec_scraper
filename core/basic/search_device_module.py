@@ -139,15 +139,26 @@ async def search_product_by_model(session: AsyncSession,
         return line[0]
 
 
-async def all_items_by_brand(session: AsyncSession, brand: Brand) -> list[dict]:
-    stmt = (select(Product.title_line,
-                   Brand.brand.label("brand_name"),
-                   Product_Type.type.label("ptype"),
-                   Product.info,
-                   Product.pros_cons,
-                   Product.source).join(Brand, Product.brand_id == Brand.id)
-            .join(Product_Type, Product.product_type_id == Product_Type.id)
-            .where(Brand.id == brand.id))
+async def all_items_by_brand(session: AsyncSession,
+                             brand: Brand,
+                             ptype: Product_Type | None = None) -> list[dict]:
+    stmt = (
+        select(
+            Product.title_line,
+            Brand.brand.label("brand_name"),
+            Product_Type.type.label("ptype"),
+            Product.info,
+            Product.pros_cons,
+            Product.source
+        )
+        .join(Brand, Product.brand_id == Brand.id)
+        .join(Product_Type, Product.product_type_id == Product_Type.id)
+        .where(Brand.id == brand.id)
+    )
+
+    if ptype is not None:
+        stmt = stmt.where(Product_Type.id == ptype.id)
+
     rows = (await session.execute(stmt)).all()
     result = list()
     for line in rows:

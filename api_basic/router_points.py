@@ -12,7 +12,7 @@ from core.basic.search_device_module import (search_devices,
                                              search_device_forced, search_product_by_model, all_items_by_brand)
 
 from database.engine import db
-from database.models import Brand
+from database.models import Brand, Product_Type
 from templates import templates
 
 ############################################################### GET #################################################
@@ -83,7 +83,9 @@ async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.
     brand = await search_product_by_model(session=session,
                                           query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
     if brand:
-        result = await all_items_by_brand(session=session, brand=brand)
+        ptype = await search_product_by_model(session=session,
+                                              query_string=item, model=Product_Type, tsv_column=Product_Type.kind_tsv)
+        result = await all_items_by_brand(session=session, brand=brand, ptype=ptype)
         return result
 
 
