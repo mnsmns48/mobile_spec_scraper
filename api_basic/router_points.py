@@ -9,7 +9,7 @@ from api_basic.schemas import ItemList
 from api_basic.errors import ValidationFailedException
 from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
 from core.basic.search_device_module import (search_devices,
-                                             search_device_forced, search_product_by_model, all_items_by_brand)
+                                             search_device_forced, search_product_by_model, all_dependencies)
 
 from database.engine import db
 from database.models import Brand, Product_Type
@@ -78,16 +78,15 @@ async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.
     return result
 
 
-@post_info.post("/get_items_by_brand/")
-async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.session_getter)):
+@post_info.post("/get_dependency_list/")
+async def get_dependency_list(item: str, session: AsyncSession = Depends(db.session_getter)):
     brand = await search_product_by_model(session=session,
                                           query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
 
     ptype = await search_product_by_model(session=session,
                                           query_string=item, model=Product_Type, tsv_column=Product_Type.kind_tsv)
     if brand or ptype:
-        print('brand', brand.brand if brand else None, 'ptype', ptype.type if ptype else None)
-        result = await all_items_by_brand(session=session, brand=brand, ptype=ptype)
+        result = await all_dependencies(session=session, brand=brand, ptype=ptype)
         return result
 
 

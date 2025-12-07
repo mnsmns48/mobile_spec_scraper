@@ -139,9 +139,13 @@ async def search_product_by_model(session: AsyncSession,
         return line[0]
 
 
-async def all_items_by_brand(session: AsyncSession,
-                             brand: Brand | None = None,
-                             ptype: Product_Type | None = None) -> list[dict]:
+async def all_dependencies(session: AsyncSession,
+                           brand: Brand | None = None,
+                           ptype: Product_Type | None = None) -> list[dict]:
+
+    if brand is None and ptype is None:
+        return []
+
     stmt = (
         select(
             Product.title_line,
