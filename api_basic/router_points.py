@@ -82,9 +82,11 @@ async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.
 async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.session_getter)):
     brand = await search_product_by_model(session=session,
                                           query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
-    if brand:
-        ptype = await search_product_by_model(session=session,
-                                              query_string=item, model=Product_Type, tsv_column=Product_Type.kind_tsv)
+
+    ptype = await search_product_by_model(session=session,
+                                          query_string=item, model=Product_Type, tsv_column=Product_Type.kind_tsv)
+    if brand or ptype:
+        print('brand', brand.brand if brand else None, 'ptype', ptype.type if ptype else None)
         result = await all_items_by_brand(session=session, brand=brand, ptype=ptype)
         return result
 
