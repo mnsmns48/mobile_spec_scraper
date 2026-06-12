@@ -2,10 +2,12 @@ import asyncio
 import re
 from fastapi import Request, Form, APIRouter, Depends
 from fastapi.responses import HTMLResponse
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from api_auth.dependencies.api_connect import verify_service_token
-from api_basic.schemas import ItemList
+from api_basic.schemas import ItemList, ItemInfoRequest, ProductResponse
 
 from api_basic.errors import ValidationFailedException
 from core.basic.logic_module import add_new_one, get_nanoreview_list_for_parsing
@@ -13,7 +15,7 @@ from core.basic.search_device_module import (search_devices,
                                              search_device_forced, search_product_by_model, all_dependencies)
 
 from database.engine import db
-from database.models import Brand, Product_Type
+from database.models import Brand, Product_Type, Product
 from templates import templates
 
 ############################################################### GET #################################################
@@ -123,3 +125,36 @@ async def submit_pars_all(request: Request):
             return templates.TemplateResponse("no_items.html", {"request": request})
     else:
         raise ValidationFailedException(message="URL does not match the expected format")
+
+
+@post_info.post("/refresh_item")
+async def refresh_item(payload: ItemInfoRequest,
+                       session: AsyncSession = Depends(db.session_getter),
+                       _=Depends(verify_service_token)):
+    stmt = (
+        select(Product)
+        .options(
+            selectinload(Product.brand),
+            selectinload(Product.product_type)
+        )
+        .join(Brand, Product.brand_id == Brand.id)
+        .join(Product_Type, Product.product_type_id == Product_Type.id)
+        .where(
+            Product.title_line == payload.title,
+            Brand.brand == payload.brand,
+            Product_Type.type == payload.type,
+        )
+    )
+
+    result = await session.execute(stmt)
+    product = result.scalar_one_or_none()
+
+    if not product:
+        return None
+
+    updated_result = await add_new_one(session=session, url=product.link)
+    if updated_result.get("response") == 'updated':
+        return ProductResponse(title_line=updated_result["title_line"],
+                               source=updated_result["source"],
+                               pros_cons=updated_result["pros_cons"],
+                               info=updated_result["info"])
