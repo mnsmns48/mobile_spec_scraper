@@ -130,7 +130,7 @@ async def submit_pars_all(request: Request):
 @post_info.post("/refresh_item")
 async def refresh_item(payload: ItemInfoRequest,
                        session: AsyncSession = Depends(db.session_getter),
-                       # _=Depends(verify_service_token)
+                       _=Depends(verify_service_token)
                        ):
     stmt = (
         select(Product)
