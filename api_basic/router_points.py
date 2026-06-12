@@ -4,6 +4,7 @@ from fastapi import Request, Form, APIRouter, Depends
 from fastapi.responses import HTMLResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api_auth.dependencies.api_connect import verify_service_token
 from api_basic.schemas import ItemList
 
 from api_basic.errors import ValidationFailedException
@@ -43,7 +44,7 @@ post_info = APIRouter(tags=['Post'])
 
 
 @post_info.post("/get_one/")
-async def get_one_item(data: str):
+async def get_one_item(data: str, _=Depends(verify_service_token)):
     async with db.scoped_session() as session:
         brand = await search_product_by_model(session=session,
                                               query_string=data, model=Brand, tsv_column=Brand.brand_depends_tsv)
@@ -79,7 +80,9 @@ async def get_brand_by_searchline(item: str, session: AsyncSession = Depends(db.
 
 
 @post_info.post("/get_dependency_list/")
-async def get_dependency_list(item: str, session: AsyncSession = Depends(db.session_getter)):
+async def get_dependency_list(item: str,
+                              session: AsyncSession = Depends(db.session_getter),
+                              _=Depends(verify_service_token)):
     brand = await search_product_by_model(session=session,
                                           query_string=item, model=Brand, tsv_column=Brand.brand_depends_tsv)
 
