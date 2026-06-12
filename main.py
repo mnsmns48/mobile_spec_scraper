@@ -6,12 +6,19 @@ from fastapi.staticfiles import StaticFiles
 from api_auth.routers import auth_api_router
 from api_basic.routers import basic_router
 from api_basic.handlers import register_handlers
+from config.middlewares import RequestLoggingMiddleware
 
 from config.settings import app_setup
 
 app = FastAPI(docs_url=app_setup.docs_url)
+
 app.add_middleware(CORSMiddleware,
-                   allow_origins=["*"], allow_methods=["*"], allow_headers=["*"], allow_credentials=True)
+                   allow_origins=["*"],
+                   allow_methods=["*"],
+                   allow_headers=["*"],
+                   allow_credentials=True)
+
+app.add_middleware(RequestLoggingMiddleware)
 app.include_router(router=basic_router)
 app.include_router(router=auth_api_router)
 
