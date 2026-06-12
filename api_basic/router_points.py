@@ -130,7 +130,8 @@ async def submit_pars_all(request: Request):
 @post_info.post("/refresh_item")
 async def refresh_item(payload: ItemInfoRequest,
                        session: AsyncSession = Depends(db.session_getter),
-                       _=Depends(verify_service_token)):
+                       # _=Depends(verify_service_token)
+                       ):
     stmt = (
         select(Product)
         .options(
@@ -156,5 +157,5 @@ async def refresh_item(payload: ItemInfoRequest,
     if updated_result.get("response") == 'updated':
         return ProductResponse(title_line=updated_result["title_line"],
                                source=updated_result["source"],
-                               pros_cons=updated_result["pros_cons"],
+                               pros_cons=updated_result.get("pros_cons"),
                                info=updated_result["info"])

@@ -16,7 +16,7 @@ class ItemInfoRequest(BaseModel):
 class ProductResponse(BaseModel):
     title_line: str
     source: str
-    pros_cons: dict
+    pros_cons: dict | None = None
     info: list
 
     class Config:
