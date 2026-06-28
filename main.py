@@ -4,8 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from api_auth.routers import auth_api_router
-from api_basic.routers import basic_router
+
 from api_basic.handlers import register_handlers
+from api_basic.router import basic_router
 from config.middlewares import RequestLoggingMiddleware
 
 from config.settings import app_setup

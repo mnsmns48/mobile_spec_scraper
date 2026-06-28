@@ -2,7 +2,7 @@ from datetime import datetime
 from typing import Annotated, Optional
 
 from sqlalchemy import DateTime, func, UniqueConstraint, Index, text, Computed, String, ForeignKey
-from sqlalchemy.dialects.postgresql import JSON, TSVECTOR, ARRAY, JSONB
+from sqlalchemy.dialects.postgresql import TSVECTOR, ARRAY, JSONB
 from sqlalchemy.orm import mapped_column, Mapped, relationship
 from sqlalchemy import event
 
@@ -31,6 +31,7 @@ class Product(Base):
     pros_cons: Mapped[Optional[info_obj]]
     create: Mapped[datetime] = mapped_column(DateTime(timezone=False))
     update: Mapped[datetime_obj]
+
     product_type: Mapped['Product_Type'] = relationship('Product_Type', back_populates='products')
     brand: Mapped['Brand'] = relationship('Brand', back_populates='products')
 
