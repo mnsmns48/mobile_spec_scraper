@@ -4,15 +4,16 @@ from starlette.responses import HTMLResponse
 
 from templates import templates
 
+welcome_router = APIRouter(tags=['Welcome'])
 template_router = APIRouter(tags=['Template Router'])
 
 
-@template_router.get("/welcome")
+@welcome_router.get("/welcome")
 async def welcome():
     return {"status": "ok"}
 
 
-@template_router.get("/")
+@welcome_router.get("/")
 async def render_start_page(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
