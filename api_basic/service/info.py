@@ -1,3 +1,4 @@
+import logging
 from typing import List, Dict
 
 from fastapi import HTTPException
@@ -6,7 +7,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm.attributes import flag_modified
 
 from api_basic.crud import get_feature, save_feature
-from api_basic.helpers import find_category_index
+from api_basic.helpers import find_category_index, normalize_title_line
+from config import logger
 
 
 class InsertedBlock(BaseModel):
@@ -94,12 +96,10 @@ class FeatureInfo:
 
             feature.info = info
             flag_modified(feature, "info")
-
             await session.commit()
             await session.refresh(feature)
-
-            return FeatureResponseScheme(id=feature.id,
-                                         title=feature.title, info=info, pros_cons=feature.pros_cons or {})
+            return FeatureResponseScheme(id=feature.id, title=feature.title, info=list(feature.info or []),
+                                         pros_cons=feature.pros_cons or {})
 
     @staticmethod
     async def create_new_info_category_db(payload: CreateFeatureCategory, session: AsyncSession):

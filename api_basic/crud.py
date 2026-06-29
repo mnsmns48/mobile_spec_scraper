@@ -2,6 +2,7 @@ from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from api_basic.helpers import normalize_title_line
 from api_basic.schemas import TypeAndBrandResponse, TypeModel, BrandModel
 from database.models import Brand, Product_Type, Product
 
@@ -75,7 +76,7 @@ async def get_type_and_brand(brand_name: str, type_name: str, session: AsyncSess
 
 
 async def get_feature_and_validate_pros_cons(product_title: str, attribute: str, session: AsyncSession) -> Product:
-    result = await session.execute(select(Product).where(Product.title_line == product_title.strip()))
+    result = await session.execute(select(Product).where(Product.title_line == normalize_title_line(product_title)))
     feature = result.scalar_one_or_none()
 
     if not feature:
@@ -91,7 +92,7 @@ async def get_feature_and_validate_pros_cons(product_title: str, attribute: str,
 
 
 async def get_feature(product_title: str, session: AsyncSession) -> Product | None:
-    result = await session.execute(select(Product).where(Product.title_line == product_title.strip()))
+    result = await session.execute(select(Product).where(Product.title_line == normalize_title_line(product_title)))
     feature = result.scalar_one_or_none()
     return feature or None
 
