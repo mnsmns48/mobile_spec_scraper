@@ -17,12 +17,12 @@ logger_config_dict = {
     'handlers': {
         'console': {
             'class': 'logging.StreamHandler',
-            'level': 'DEBUG',
+            'level': 'INFO',
             'formatter': 'std_format'
         },
         'logfile': {
             'class': 'logging.FileHandler',
-            'level': 'DEBUG',
+            'level': 'INFO',
             'filename': log_file,
             'encoding': 'utf-8',
             'mode': 'a',
@@ -31,7 +31,7 @@ logger_config_dict = {
     },
     'loggers': {
         'logger': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'handlers': ['console', 'logfile'],
             # 'propagate': False
         }

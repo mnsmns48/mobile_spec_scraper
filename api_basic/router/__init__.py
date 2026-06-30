@@ -11,5 +11,5 @@ basic_router = APIRouter()
 
 basic_router.include_router(welcome_router)
 basic_router.include_router(template_router, dependencies=[Depends(current_super_user)])
-basic_router.include_router(api_v1_router, dependencies=[Depends(current_super_user)])
+basic_router.include_router(api_v1_router, dependencies=[Depends(verify_service_token)])
 basic_router.include_router(api_v2_router, dependencies=[Depends(verify_service_token)])
