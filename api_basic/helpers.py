@@ -26,9 +26,17 @@ def clean_kind_list(kind_list: list[str]) -> list[str]:
 
 def normalize_title_line(title: str) -> str:
     words = title.strip().split()
-
     normalized_words = []
+
     for w in words:
+        if w.isupper():
+            normalized_words.append(w)
+            continue
+
+        if any(c.isdigit() for c in w) and all(c.isupper() for c in w if c.isalpha()):
+            normalized_words.append(w)
+            continue
+
         if "-" in w:
             parts = w.split("-")
             parts = [p.capitalize() for p in parts]
